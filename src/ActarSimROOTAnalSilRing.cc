@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol
+//*-- AUTHOR : Hector Alvarez Pol     hapol@fpddux.usc.es
 //*-- Date: 05/2005
-//*-- Last Update: 07/01/15 by Hector Alvarez Pol
+//*-- Last Update: 25/10/06 by Hector Alvarez Pol
 // --------------------------------------------------------------
 // Description:
 //   The ACTAR SilRingicon detectorpart of the ROOT Analysis

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol
+//*-- AUTHOR : Hector Alvarez Pol    hapolyo@usc.es
 //*-- Date: 04/2008
-//*-- Last Update: 15/12/14
+//*-- Last Update: 05/05/08
 // --------------------------------------------------------------
 // Description:
 //   Messenger of the GAS ACTAR detector
@@ -40,11 +40,7 @@ private:
   ActarSimDetectorConstruction* ActarSimDetector;
   ActarSimGasDetectorConstruction* ActarSimGasDetector;
      
-  G4UIcmdWithAnInteger*      gasMixtureFlagCmd;
-  G4UIcommand*               gasMixtureCmd;
-
   G4UIdirectory*             detDir;
-  G4UIdirectory*             detDirMix;
 
   G4UIcmdWithAString*        gasMaterCmd;
   G4UIcmdWithADoubleAndUnit* gasPresCmd;
@@ -64,14 +60,6 @@ private:
   G4UIcmdWithADoubleAndUnit* innerRadiusBeamShieldTubCmd;
   G4UIcmdWithADoubleAndUnit* outerRadiusBeamShieldTubCmd;
   G4UIcmdWithADoubleAndUnit* lengthBeamShieldTubCmd;
-
-  //For the gas mixture
-  G4int fGasNumber;
-  G4String fGasMaterial;
-  G4double fGasRatio;
-
-private:
-  void GasMixtureCommand(G4String newValues);
 
 public:
   ActarSimGasDetectorMessenger(ActarSimDetectorConstruction* ,ActarSimGasDetectorConstruction* );

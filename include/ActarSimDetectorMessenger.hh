@@ -1,14 +1,13 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol hapolyo@usc.es
 //*-- Date: 11/2004
-//*-- Last Update: 1/12/14
+//*-- Last Update: 29/11/05
 // --------------------------------------------------------------
 // Description:
 //   Messenger for the detector construction
 //
 // --------------------------------------------------------------
 // Comments:
-//   Messenger commands are described in their guidance (src/.cc)
 //   - 03/12/04 Created based on example/novice/N03 structure
 //
 // --------------------------------------------------------------
@@ -44,6 +43,7 @@ private:
   G4UIcmdWithADoubleAndUnit* yGasChamberCmd;
   G4UIcmdWithADoubleAndUnit* zGasChamberCmd;
   G4UIcmdWithAString* gasGeoIncludedFlagCmd;
+  G4UIcmdWithADoubleAndUnit* yPadSizeCmd;
   G4UIcmdWithAString* silGeoIncludedFlagCmd;
   G4UIcmdWithAString* sciGeoIncludedFlagCmd;
  

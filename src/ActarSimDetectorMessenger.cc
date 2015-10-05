@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol hapolyo@usc.es
 //*-- Date: 11/2004
-//*-- Last Update: 1/12/14
+//*-- Last Update: 04/04/06
 // --------------------------------------------------------------
 // Description:
 //   Messenger for the detector construction
@@ -65,6 +65,13 @@ ActarSimDetectorMessenger(ActarSimDetectorConstruction* ActarSimDet)
   zGasChamberCmd->SetRange("zGasChamber>=0.");
   zGasChamberCmd->SetUnitCategory("Length");
   zGasChamberCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  yPadSizeCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/det/setYPadSize",this);
+  yPadSizeCmd->SetGuidance("Select the height of the pad plane.");
+  yPadSizeCmd->SetParameterName("yPadSize",false);
+  yPadSizeCmd->SetRange("yPadSize>=0.");
+  yPadSizeCmd->SetUnitCategory("Length");
+  yPadSizeCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   gasGeoIncludedFlagCmd = new G4UIcmdWithAString("/ActarSim/det/gasGeoIncludedFlag",this);
   gasGeoIncludedFlagCmd->SetGuidance("Includes the geometry of the gas volume in the simulation (default off).");
@@ -137,6 +144,7 @@ ActarSimDetectorMessenger::~ActarSimDetectorMessenger() {
   delete xGasChamberCmd;
   delete yGasChamberCmd;
   delete zGasChamberCmd;
+  delete yPadSizeCmd;
   delete gasGeoIncludedFlagCmd;
   delete silGeoIncludedFlagCmd;
   delete sciGeoIncludedFlagCmd;
@@ -170,6 +178,11 @@ void ActarSimDetectorMessenger::SetNewValue(G4UIcommand* command,
   if(command == zGasChamberCmd)
   {
     ActarSimDetector->SetZGasChamber(zGasChamberCmd->GetNewDoubleValue(newValue));
+  }
+
+  if(command == yPadSizeCmd)
+  {
+    ActarSimDetector->SetYPadSize(yPadSizeCmd->GetNewDoubleValue(newValue));
   }
 
   if( command == gasGeoIncludedFlagCmd )

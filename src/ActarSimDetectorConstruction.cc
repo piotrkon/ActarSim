@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol hapol@fpddux.usc.es
 //*-- Date: 05/2005
-//*-- Last Update:  1/12/14
+//*-- Last Update:  16/05/08
 // --------------------------------------------------------------
 // Description:
 //   Detector construction and complementary definitions
@@ -38,6 +38,10 @@
 
 #include "G4RotationMatrix.hh"
 #include "G4Material.hh"
+#include "G4Element.hh"
+#include "G4MaterialTable.hh"
+#include "G4NistManager.hh"
+#include "G4Sphere.hh"
 #include "G4Box.hh"
 #include "G4Tubs.hh"
 #include "G4LogicalVolume.hh"
@@ -90,11 +94,12 @@ ActarSimDetectorConstruction::ActarSimDetectorConstruction()
   sciSD = new ActarSimSciSD( sciSDname );
   SDman->AddNewDetector( sciSD );
           
-  //  sciRing volume
-  G4String sciRingSDname = "sciRingSD";
-  sciRingSD = new ActarSimSciRingSD( sciRingSDname );
-  SDman->AddNewDetector( sciRingSD );
+    //  sciRing volume
+    G4String sciRingSDname = "sciRingSD";
+    sciRingSD = new ActarSimSciRingSD( sciRingSDname );
+    SDman->AddNewDetector( sciRingSD );
        
+          
   // pla volume
   G4String plaSDname = "plaSD";
   plaSD = new ActarSimPlaSD( plaSDname );
@@ -102,10 +107,11 @@ ActarSimDetectorConstruction::ActarSimDetectorConstruction()
 
   //define materials and set medium material
   DefineMaterials();
-  SetMediumMaterial("Air");
-  SetDefaultMaterial("Galactic");
-  //SetChamberMaterial("Air");
-  SetChamberMaterial("Galactic");
+  SetMediumMaterial("G4_AIR");
+  //SetDefaultMaterial("Galactic");
+  SetDefaultMaterial("G4_AIR");
+  SetChamberMaterial("G4_AIR");
+  //SetChamberMaterial("Galactic");
   SetWindowMaterial("Mylar");
 
   //electric and magnetic fields
@@ -140,10 +146,8 @@ G4VPhysicalVolume* ActarSimDetectorConstruction::ConstructActar() {
   //
   // Geometrical definition of the world and gas volume
   //
-  //G4double yPadSize=4.54*mm;//Pad Plane Height
-  SetYPadSize(4.54*mm);//Pad Plane Height
 
-  //G4double yGasBoxPosition=GetYGasBoxPosition();
+  G4double yGasBoxPosition=GetYGasBoxPosition();
   G4double zGasBoxPosition=GetZGasBoxPosition();
 
   chamberSizeX=GetChamberXLength();
@@ -153,24 +157,28 @@ G4VPhysicalVolume* ActarSimDetectorConstruction::ConstructActar() {
   G4double worldSizeX,worldSizeY,worldSizeZ;
 
   G4double chamberVolumeCenterPosX = 0.*m;
-  //G4double chamberVolumeCenterPosY = chamberSizeY-(yGasBoxPosition+yPadSize);//the beam enters at the middle of GasBox
-  G4double chamberVolumeCenterPosY = chamberSizeY-yPadSize;//the beam enters at the pad level
+  G4double chamberVolumeCenterPosY = chamberSizeY-(yGasBoxPosition+yPadSize);//the beam enters at the middle of GasBox
+  //G4double chamberVolumeCenterPosY = chamberSizeY-yPadSize;//the beam enters at the pad level
   G4double chamberVolumeCenterPosZ = zGasBoxPosition;//beam origin at the entrance of GasBox
-
-  if( MaikoGeoIncludedFlag == "on"){
-    worldSizeX = 6.*m;
-    worldSizeY = 6.*m;
-    worldSizeZ = 6.*m;
-  }
-  else {
+  /*
+    worldSizeX = 1.*m;
+    worldSizeY = 1.*m;
+    worldSizeZ = 1.*m;
+  */
+  
     worldSizeX = .5*m;
     worldSizeY = .5*m;
     worldSizeZ = .5*m;
-  }
+  
+  
+  // ---------------------------------------------
+  // World volume, filled with air
+  // 
 
+  
   solidWorld = new G4Box("World",                      //its name
 			 worldSizeX,worldSizeY,worldSizeZ);   //its size
-
+  
   worldLog = new G4LogicalVolume(solidWorld,          //its solid
 				 mediumMaterial,      //its material
 				 "World");            //its name
@@ -182,6 +190,8 @@ G4VPhysicalVolume* ActarSimDetectorConstruction::ConstructActar() {
 				0,                     //its mother  volume
 				false,                 //no boolean operation
 				0);                    //copy number
+  
+
 
   G4VPhysicalVolume* chamberPhys;
     
@@ -191,6 +201,7 @@ G4VPhysicalVolume* ActarSimDetectorConstruction::ConstructActar() {
   G4LogicalVolume* chamberLog = new G4LogicalVolume(solidChamber, //its solid
 						    chamberMaterial,
 						    "Chamber");            //its name
+    
     
   chamberPhys = new G4PVPlacement(0,                     //no rotation
                                   G4ThreeVector(chamberVolumeCenterPosX,
@@ -204,169 +215,130 @@ G4VPhysicalVolume* ActarSimDetectorConstruction::ConstructActar() {
   
   if(chamberPhys){;}
 
-  if( MaikoGeoIncludedFlag == "on"){
-   
-    //--------------------------
-    // Beam exit Window in Chamber
-    //-------------------------- 
-
-    G4double innerRadius = 0.*cm;
-    G4double outerRadius = 10.*cm;
-    G4double hz = 0.037*mm;
-    G4double startAngle = 0.*deg;
-    G4double spanningAngle = 360.*deg;
-
-    G4VPhysicalVolume* mylarWin;
-    
-    G4Tubs* mwindow
-      = new G4Tubs("mwindow",
-		   innerRadius,
-		   outerRadius,
-		   hz,
-		   startAngle,
-		   spanningAngle);
  
-    G4LogicalVolume* mwindowLog = new G4LogicalVolume(mwindow,          //its solid
-                                                      windowMaterial,      //its material
-                                                      "mwindow");            //its name
-    
-    
-    mylarWin = new G4PVPlacement(0,                     //no rotation
-				    G4ThreeVector(0,0,chamberSizeZ+zGasBoxPosition),
-                                    mwindowLog,            //its logical volume
-                                    "mwindow",               //its name
-                                    worldLog,                     //its mother  volume
-                                    false,                 //no boolean operation
-                                    0);                    //copy number
+  /*
+  //--------------------------
+  // Beam enter Window in Chamber
+  //-------------------------- 
 
-    if(mylarWin){;}    
-
-    G4VisAttributes* mylarVisAtt = new G4VisAttributes(G4Colour(1.0,0.0,0.0));
-  	mylarVisAtt->SetVisibility(true);
-  	mwindowLog->SetVisAttributes(mylarVisAtt);
-  }   
-  else {
-   
-    //--------------------------
-    // Beam enter Window in Chamber
-    //-------------------------- 
-
-    G4double window_outer_radius = 36*mm;
-    G4double window_inner_radius = 0*mm;
-    G4double window_half_length = 5*mm;
-    G4double startAngle = 0.*deg;
-    G4double spanningAngle = 360.*deg;
+  G4double window_outer_radius = 36*mm;
+  G4double window_inner_radius = 0*mm;
+  G4double window_half_length = 5*mm;
+  G4double startAngle = 0.*deg;
+  G4double spanningAngle = 360.*deg;
     
-    G4Tubs *window = new G4Tubs("Window",window_inner_radius,window_outer_radius,window_half_length,
-				startAngle,spanningAngle);
-    G4VisAttributes* windowVisAtt= new G4VisAttributes(G4Colour(1.0,0.,0.));
-    windowVisAtt->SetVisibility(true);
+  G4Tubs *window = new G4Tubs("Window",window_inner_radius,window_outer_radius,window_half_length,
+			      startAngle,spanningAngle);
+  G4VisAttributes* windowVisAtt= new G4VisAttributes(G4Colour(1.0,0.,0.));
+  windowVisAtt->SetVisibility(true);
     
-    G4LogicalVolume* window_log = new G4LogicalVolume(window,chamberMaterial,"window_log",0,0,0);
+  G4LogicalVolume* window_log = new G4LogicalVolume(window,chamberMaterial,"window_log",0,0,0);
     
-    window_log->SetVisAttributes(windowVisAtt);
-    
-    G4double windowPosZ=-chamberSizeZ+window_half_length+22*mm;//enter window is situated 22mm inside chamber
-    G4double windowPosY=0*cm;
-    G4double windowPosX=0*mm;
+  window_log->SetVisAttributes(windowVisAtt);
+        
+  G4double windowPosZ=-chamberSizeZ+window_half_length+22*mm;//enter window is situated 22mm inside chamber
+  G4double windowPosY=0*cm;
+  G4double windowPosX=0*mm;
   
-    G4RotationMatrix *rot=0;
+  G4RotationMatrix *rot=0;
 
-    G4VPhysicalVolume* window_phys=new G4PVPlacement(rot,G4ThreeVector(windowPosX,windowPosY,windowPosZ),window_log,"window",chamberLog,false,0);  
+  G4VPhysicalVolume* window_phys=new G4PVPlacement(rot,G4ThreeVector(windowPosX,windowPosY,windowPosZ),window_log,"window",chamberLog,false,0);  
 
-    if(window_phys){;}
+  if(window_phys){;}
 
-    G4double z,a,density,ncomponents,natoms;
+*/
+  G4double z,a,density,ncomponents,natoms;
 
-    G4Material* Al = 
-      new G4Material("Aluminum", z= 13., a= 26.98*g/mole, density= 2.7*g/cm3);
+  G4Material* Al = 
+    new G4Material("Aluminum", z= 13., a= 26.98*g/mole, density= 2.7*g/cm3);
 
-    G4Element* Pb = new G4Element("Lead", "Pb", z=82., a=    207.20*g/mole);
-    G4Material* Lead =
-      new G4Material("Lead", density= 11.34*g/cm3, ncomponents=1);
-    Lead->AddElement(Pb, natoms=1);
+  G4Element* Pb = new G4Element("Lead"     ,"Pb", z=82., a=    207.20*g/mole);
+  G4Material* Lead =
+    new G4Material("Lead", density= 11.34*g/cm3, ncomponents=1);
+  Lead->AddElement(Pb, natoms=1);
 
-    //Support of the field cage
-    G4RotationMatrix* rotLeft = //ZY planes
-      new G4RotationMatrix(pi/2,pi/2,-pi/2);
-    G4RotationMatrix* rotRight = //ZY planes
-      new G4RotationMatrix(-pi/2,pi/2,pi/2);
+  /*
+  //Support of the field cage
+  G4RotationMatrix* rotLeft = //ZY planes
+    new G4RotationMatrix(pi/2,pi/2,-pi/2);
+  G4RotationMatrix* rotRight = //ZY planes
+    new G4RotationMatrix(-pi/2,pi/2,pi/2);
 
-    G4double Support_x = 8.*mm;
-    G4double Support_x2 = 6.4*mm;
-    G4double Support_y = 85.*mm;
-    G4double Support_z = 1.6*mm;
+  G4double Support_x = 8.*mm;
+  G4double Support_x2 = 6.4*mm;
+  G4double Support_y = 85.*mm;
+  G4double Support_z = 1.6*mm;
 
-    G4Box* SupportBox=
-      new G4Box("SupportBox", Support_x, Support_y, Support_z);
+  G4Box* SupportBox=
+    new G4Box("SupportBox", Support_x, Support_y, Support_z);
 
-    G4Box* SupportBox2=
-      new G4Box("SupportBox2", Support_x2, Support_y, Support_z);
+  G4Box* SupportBox2=
+    new G4Box("SupportBox2", Support_x2, Support_y, Support_z);
 
-    SupportLog=new G4LogicalVolume(SupportBox,Lead,"SupportLog");
+  SupportLog=new G4LogicalVolume(SupportBox,Lead,"SupportLog");
 
-    SupportPhys=new G4PVPlacement(0,G4ThreeVector(32+6.175-8,-15,64+6.575),//should take the pad x syze from a variable, will do it later
+  SupportPhys=new G4PVPlacement(0,G4ThreeVector(32+6.175-8,-15,64+6.575),//should take the pad x syze from a variable, will do it later
     				SupportLog,"Support",chamberLog,false,0); 
 
-    SupportPhys=new G4PVPlacement(0,G4ThreeVector(-32-6.175+8,-15,64+6.575),//should take the pad x syze from a variable, will do it later
+  SupportPhys=new G4PVPlacement(0,G4ThreeVector(-32-6.175+8,-15,64+6.575),//should take the pad x syze from a variable, will do it later
     				SupportLog,"Support",chamberLog,false,1); 
 
-    G4VisAttributes* SupportVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));
-    SupportVisAtt->SetVisibility(true);   
-    SupportLog->SetVisAttributes(SupportVisAtt);
+  G4VisAttributes* SupportVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));
+  SupportVisAtt->SetVisibility(true);   
+  SupportLog->SetVisAttributes(SupportVisAtt);
 
-    SupportLog=new G4LogicalVolume(SupportBox2,Lead,"SupportLog");
+  SupportLog=new G4LogicalVolume(SupportBox2,Lead,"SupportLog");
 
-    SupportPhys=new G4PVPlacement(rotRight,G4ThreeVector(32+4.575,-15,64+4.975-6.4),//should take the pad x syze from a variable, will do it later
+  SupportPhys=new G4PVPlacement(rotRight,G4ThreeVector(32+4.575,-15,64+4.975-6.4),//should take the pad x syze from a variable, will do it later
     				SupportLog,"Support",chamberLog,false,2); 
 
-    SupportPhys=new G4PVPlacement(rotLeft,G4ThreeVector(-32-4.575,-15,64+4.975-6.4),//should take the pad x syze from a variable, will do it later
+  SupportPhys=new G4PVPlacement(rotLeft,G4ThreeVector(-32-4.575,-15,64+4.975-6.4),//should take the pad x syze from a variable, will do it later
     				SupportLog,"Support",chamberLog,false,2); 
 
 
-    SupportVisAtt->SetVisibility(true);   
-    SupportLog->SetVisAttributes(SupportVisAtt);
+  SupportVisAtt->SetVisibility(true);   
+  SupportLog->SetVisAttributes(SupportVisAtt);
 
 
-    //A Diamond detector in front of the dssd detectors to catch the beam
-    G4double Diamond_x = 12.*mm;
-    G4double Diamond_y = 12.*mm;
-    G4double Diamond_z = 0.75*mm;
+  //A Diamond detector in front of the dssd detectors to catch the beam
+  G4double Diamond_x = 12.*mm;
+  G4double Diamond_y = 12.*mm;
+  G4double Diamond_z = 0.75*mm;
 
-    G4Box* DiamondBox=
-      new G4Box("DiamondBox", Diamond_x, Diamond_y, Diamond_z);
+  G4Box* DiamondBox=
+    new G4Box("DiamondBox", Diamond_x, Diamond_y, Diamond_z);
 
-    DiamondLog=new G4LogicalVolume(DiamondBox,Lead,"DiamondLog");
+  DiamondLog=new G4LogicalVolume(DiamondBox,Lead,"DiamondLog");
 
-    DiamondPhys=new G4PVPlacement(0,G4ThreeVector(0,0,64+23),//should take the pad x syze from a variable, will do it later
+  DiamondPhys=new G4PVPlacement(0,G4ThreeVector(0,0,64+23),//should take the pad x syze from a variable, will do it later
     				DiamondLog,"Diamond",chamberLog,false,0); 
 
-    G4VisAttributes* DiamondVisAtt= new G4VisAttributes(G4Colour(1.0,0.,1.0));
-    DiamondVisAtt->SetVisibility(true);   
-    DiamondLog->SetVisAttributes(DiamondVisAtt);
+  G4VisAttributes* DiamondVisAtt= new G4VisAttributes(G4Colour(1.0,0.,1.0));
+  DiamondVisAtt->SetVisibility(true);   
+  DiamondLog->SetVisAttributes(DiamondVisAtt);
+    */
+  //An aluminium plate to see the Pads active area
+  G4double plateSizeX = 32*mm;
+  G4double plateSizeY = yPadSize/2*mm;
+  G4double plateSizeZ = 64*mm;
 
-    //An aluminium plate to see the Pads active area
-    G4double plateSizeX = 32*mm;
-    G4double plateSizeY = yPadSize/2*mm;
-    G4double plateSizeZ = 64*mm;
-    
-    G4Box *Alplate=new G4Box("Al_plate",plateSizeX,plateSizeY,plateSizeZ);
+  G4Box *Alplate=new G4Box("Al_plate",plateSizeX,plateSizeY,plateSizeZ);
 
-    AlplateLog=new G4LogicalVolume(Alplate,Al,"Al_plate");
+  AlplateLog=new G4LogicalVolume(Alplate,Al,"Al_plate");
     
-    G4double platePosX = 0*cm;
-    G4double platePosY = -chamberSizeY+plateSizeY;
-    G4double platePosZ = 0*cm;
+  G4double platePosX = 0*cm;
+  G4double platePosY = -chamberSizeY+plateSizeY;
+  G4double platePosZ = 0*cm;
     
-    AlplatePhys=new G4PVPlacement(0,G4ThreeVector( platePosX,platePosY,platePosZ),
+  AlplatePhys=new G4PVPlacement(0,G4ThreeVector( platePosX,platePosY,platePosZ),
     				AlplateLog,"Al_plate",chamberLog,false,0); 
     
-    // AlplatePhys=new G4PVPlacement(0,platePos,
-    // 				  AlplateLog,"Al_plate",chamberLog,false,0); 
-    G4VisAttributes* plateVisAtt= new G4VisAttributes(G4Colour(1.0,0.,1.0));
-    plateVisAtt->SetVisibility(true);   
-    AlplateLog->SetVisAttributes(plateVisAtt);
-  }
+  // AlplatePhys=new G4PVPlacement(0,platePos,
+  // 				  AlplateLog,"Al_plate",chamberLog,false,0); 
+  G4VisAttributes* plateVisAtt= new G4VisAttributes(G4Colour(1.0,0.,1.0));
+  plateVisAtt->SetVisibility(true);   
+  AlplateLog->SetVisAttributes(plateVisAtt);
+  
  
   //--------------------------
   // Gas volume
@@ -379,12 +351,6 @@ G4VPhysicalVolume* ActarSimDetectorConstruction::ConstructActar() {
   //--------------------------
   if(silGeoIncludedFlag=="on")
     silDet->Construct(chamberLog);
-  
-  //--------------------------
-  // Sci volume
-  //--------------------------
-  if(sciGeoIncludedFlag=="on")
-    sciDet->Construct(chamberLog);
 
   //--------------------------
   // Maiko anciliaries
@@ -394,6 +360,15 @@ G4VPhysicalVolume* ActarSimDetectorConstruction::ConstructActar() {
     sciRingDet->Construct(worldLog);
     plaDet->Construct(worldLog);
   }
+  
+  //--------------------------
+  // Sci volume
+  //--------------------------
+  if(sciGeoIncludedFlag=="on")
+    sciDet->Construct(worldLog);
+  //sciDet->Construct(chamberLog);
+
+
 
   // Histogramming
   if (gActarSimROOTAnalysis)
@@ -424,8 +399,6 @@ void ActarSimDetectorConstruction::PrintDetectorParameters() {
 	 << "-- ActarSimDetectorConstruction::PrintDetectorParameters() --"
 	 << G4endl
 	 << " The medium material is: " << mediumMaterial << G4endl
-	 << G4endl << G4endl
-	 << " The chamber material is: " << chamberMaterial << G4endl
 	 << G4endl;
 
   G4cout << G4endl << " The EM field applied has the following components:"
@@ -443,11 +416,7 @@ void ActarSimDetectorConstruction::PrintDetectorParameters() {
     if (gasGeoIncludedFlag=="on") gasDet->PrintDetectorParameters();
     if (silGeoIncludedFlag=="on") silDet->PrintDetectorParameters();
     if (sciGeoIncludedFlag=="on") sciDet->PrintDetectorParameters();
-    if (MaikoGeoIncludedFlag=="on") {
-      silRingDet->PrintDetectorParameters();
-      sciRingDet->PrintDetectorParameters();
-      plaDet->PrintDetectorParameters();
-    }
+
 }
 
 
@@ -463,7 +432,7 @@ void ActarSimDetectorConstruction::SetMediumMaterial(G4String mat) {
 
 void ActarSimDetectorConstruction::SetDefaultMaterial(G4String mat) {
   //
-  // Sets the default material
+  // Sets the material the medium is made of
   //
   G4Material* pttoMaterial = G4Material::GetMaterial(mat);
   if (pttoMaterial) defaultMaterial = pttoMaterial;
@@ -475,10 +444,9 @@ void ActarSimDetectorConstruction::SetChamberMaterial(G4String mat) {
   //
   // Sets the material the chamber is made of (the same as GasBox)
   //
-  //DefineMaterials();
   G4Material* pttoMaterial = G4Material::GetMaterial(mat);
   if (pttoMaterial) chamberMaterial = pttoMaterial;
-  //G4cout << " The chamber gas material is: " << chamberMaterial  << G4endl;
+
 }
 
 void ActarSimDetectorConstruction::SetUpdateChamberMaterial(G4Material* mater) {
@@ -503,6 +471,7 @@ void ActarSimDetectorConstruction::UpdateGeometry() {
   //
   // Updates any change on the geometry of the detectors
   //
+
   G4RunManager::GetRunManager()->DefineWorldVolume(ConstructActar());
 }
 
@@ -711,6 +680,21 @@ void ActarSimDetectorConstruction::DefineMaterials() {
   new G4Material("Uranium"    , z=92., a=238.03*g/mole, density= 18.95*g/cm3);
 
 
+  G4NistManager* nistManager = G4NistManager::Instance();
+
+  // Air 
+  nistManager->FindOrBuildMaterial("G4_AIR");
+  
+  // Argon gas
+  nistManager->FindOrBuildMaterial("G4_Ar");
+  // With a density different from the one defined in NIST
+  // G4double density = 1.782e-03*g/cm3; 
+  // nistManager->BuildMaterialWithNewDensity("B5_Ar","G4_Ar",density);
+  // !! cases segmentation fault
+
+  // Scintillator
+  // (PolyVinylToluene, C_9H_10)
+  nistManager->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
 
   //
   //meterials printout

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol
+//*-- AUTHOR : Hector Alvarez Pol     hapol@fpddux.usc.es
 //*-- Date: 05/2008
-//*-- Last Update: 07/01/15 by Hector Alvarez Pol
+//*-- Last Update: 17/05/08 by Hector Alvarez Pol
 // --------------------------------------------------------------
 // Description:
 //   The ACTAR Scintillator detectorpart of the ROOT Analysis
@@ -13,8 +13,6 @@
 /////////////////////////////////////////////////////////////////
 
 #include "ActarSimROOTAnalSci.hh"
-#include "ActarSimSciHit.hh"
-#include "ActarSimSciGeantHit.hh"
 
 #include "G4ios.hh"
 #include "G4RunManager.hh"

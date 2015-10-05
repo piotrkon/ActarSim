@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol  hapol@fpddux.usc.es
 //*-- Date: 03/2005
-//*-- Last Update: 07/01/15 by hapol
+//*-- Last Update: 06/05/08 by hapol
 // --------------------------------------------------------------
 // Description:
 //   ROOT-based analysis functionality

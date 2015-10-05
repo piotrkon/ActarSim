@@ -98,7 +98,7 @@ int main(int argc,char** argv)
 #endif
   
   // set mandatory user action class
-  runManager->SetUserAction(new ActarSimPrimaryGeneratorAction);
+  runManager->SetUserAction(new ActarSimPrimaryGeneratorAction(""));
   runManager->SetUserAction(new ActarSimRunAction);
   ActarSimEventAction* eventaction = new ActarSimEventAction;
   runManager->SetUserAction(eventaction);

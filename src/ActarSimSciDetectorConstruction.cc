@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez
+//*-- AUTHOR : Hector Alvarez    hapolyo@usc.es
 //*-- Date: 04/2008
-//*-- Last Update: 07/01/15 by Hector Alvarez
+//*-- Last Update: 17/05/08 by Hector Alvarez
 // --------------------------------------------------------------
 // Description:
 //   Scintillator detector description
@@ -21,6 +21,9 @@
 #include "ActarSimSciSD.hh"
 
 #include "G4Material.hh"
+#include "G4Element.hh"
+#include "G4MaterialTable.hh"
+#include "G4NistManager.hh"
 #include "G4Box.hh"
 #include "G4Trd.hh"
 #include "G4Cons.hh"
@@ -42,7 +45,13 @@ ActarSimSciDetectorConstruction(ActarSimDetectorConstruction* det)
   //
 
 
-  SetSciBulkMaterial("CsI");
+  //SetSciBulkMaterial("CsI");
+  //SetSciBulkMaterial("BC408");
+  //SetSciBulkMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+  //SetSciBulkMaterial("G4_AIR");
+  SetSciBulkMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+
+  //sciBulkMaterial = G4Material::GetMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
 
   //Options for Silicon and scintillator coverage:
   // 6 bits to indicate which sci wall is present (1) or absent (0)
@@ -90,7 +99,7 @@ G4VPhysicalVolume* ActarSimSciDetectorConstruction::ConstructSci(G4LogicalVolume
   //  Constructs the scintillator detector elements
   //
   //talk with Patricia, Pang and Herve, May 08
-  //1) Introduce Silicon and CsI(Tl) detectors all around. Use MUST style:
+  //1) Introduce Silicon and CsI(Tl) detectors alla around. Use MUST style:
   //        Si: 300 microns thick, 100x100mm2, with 128 strides per side
   //(horizontal on one
   //        side and vertical in the opposite).
@@ -110,14 +119,19 @@ G4VPhysicalVolume* ActarSimSciDetectorConstruction::ConstructSci(G4LogicalVolume
 
   //MUST-like scintillator detectors (half-sides)
   //I left some "air" in between crystals. Half-length are 0,1 shorter.
-  G4double sciBulk_x = 12.0*mm;   //half length=12.5mm
-  G4double sciBulk_y = 12.0*mm;   //half length=12.5mm
-  G4double sciBulk_z = 15.0*mm;   //half length=15.0mm
+  // G4double sciBulk_x = 12.0*mm;   //half length=12.5mm
+  // G4double sciBulk_y = 12.0*mm;   //half length=12.5mm
+  // G4double sciBulk_z = 15.0*mm;   //half length=15.0mm
+
+  G4double sciBulk_x = 32.0*mm;   //half length
+  G4double sciBulk_y = 5.0*mm;   //half length
+  G4double sciBulk_z = 64.0*mm;   //half length
 
   G4double defectHalfLength = 0.5*mm;
   G4double separationFromBox = 25*mm;
 
   //Position of the GasBox inside the Chamber
+  G4double chamberSizeY = detConstruction->GetChamberYLength();
   G4double zGasBoxPosition=detConstruction->GetZGasBoxPosition();
 
   // Printing the final settings...
@@ -134,6 +148,8 @@ G4VPhysicalVolume* ActarSimSciDetectorConstruction::ConstructSci(G4LogicalVolume
 	 << " y dimension (half-side) of scintillator: " << sciBulk_y/mm << " mm"
 	 << G4endl
 	 << " z dimension (half-side) of scintillator: " << sciBulk_z/mm << " mm"
+	 << G4endl
+	 << " Sci Material " << sciBulkMaterial
 	 << G4endl;
   G4cout << "##################################################################"
 	 << G4endl;
@@ -149,6 +165,16 @@ G4VPhysicalVolume* ActarSimSciDetectorConstruction::ConstructSci(G4LogicalVolume
 
   sciLog =
     new G4LogicalVolume(sciBox, sciBulkMaterial, "sciLog");
+
+
+  sciPhys =
+    new G4PVPlacement(0,G4ThreeVector( 0,
+				       //chamberSizeY+sciBulk_y+5,				   
+				       2*chamberSizeY-85-4.54+sciBulk_y+10,
+				       zGasBoxPosition),
+		      //69),
+		      sciLog, "sciPhys", worldLog, false, 0);
+
 
   //As a function of the lateral coverage
   // 6 bits to indicate which sci wall is present (1) or absent (0)
@@ -187,128 +213,6 @@ G4VPhysicalVolume* ActarSimSciDetectorConstruction::ConstructSci(G4LogicalVolume
   G4RotationMatrix* rotRight = //ZY planes
     new G4RotationMatrix(-pi/2,pi/2,pi/2);
 
-//   G4int	checker = sideCoverage;
-  if(sideCoverage & 0x0001){ // bit1 (lsb) beam output wall
-    //iteration on Scintillator elements
-    /*
-    for(G4int rowX=0;rowX<numberOfRowsX;rowX++){  //maybe is rowX=1 the first??
-      for(G4int rowY=0;rowY<numberOfRowsY;rowY++){
-        iterationNumber++;
-        sciPhys =
-          new G4PVPlacement(0,G4ThreeVector(-xBoxSciHalfLength + ((rowX+1)*2-1)*(sciBulk_x+defectHalfLength),
-	 				    -yBoxSciHalfLength + ((rowY+1)*2-1)*(sciBulk_x+defectHalfLength),
-					    2*zBoxSciHalfLength + separationFromBox + sciBulk_z),
-			                    sciLog, "sciPhys", worldLog, false, iterationNumber);
-      }
-    }
-    */
-    for(G4int rowX=0;rowX<4;rowX++){  //maybe is rowX=1 the first??
-      for(G4int rowY=0;rowY<4;rowY++){
-        iterationNumber++;
-        sciPhys =
-          new G4PVPlacement(0,G4ThreeVector( (rowX-1.5)*2*(sciBulk_x+defectHalfLength),
-					     (rowY-1.5)*2*(sciBulk_x+defectHalfLength),
-					     2*zBoxSciHalfLength + separationFromBox + sciBulk_z - zGasBoxPosition),
-			    sciLog, "sciPhys", worldLog, false, iterationNumber);
-      }
-    }
-  }
-
-  //PLANES ZX
-  //a different rotation has to be introduced on each side...
-  if((sideCoverage >> 1) & 0x0001){ // bit2 lower [bottom] (gravity based) wall
-    for(G4int rowZ=0;rowZ<numberOfRowsZ;rowZ++){
-      for(G4int rowX=0;rowX<numberOfRowsX;rowX++){
-          iterationNumber++;
-          sciPhys =
-            new G4PVPlacement(rotBottom,G4ThreeVector(-xBoxSciHalfLength + ((rowX+1)*2-1)*(sciBulk_x+defectHalfLength),
-	 				         -(yBoxSciHalfLength + separationFromBox + sciBulk_z),
-					         ((rowZ+1)*2-1)*(sciBulk_x+defectHalfLength) - zGasBoxPosition),
-					         sciLog, "sciPhys", worldLog, false, iterationNumber);
-      }
-    }
-  }
-  if((sideCoverage >> 2) & 0x0001){ // bit3 upper [top] (gravity based) wall
-    for(G4int rowZ=0;rowZ<numberOfRowsZ;rowZ++){
-      for(G4int rowX=0;rowX<numberOfRowsX;rowX++){
-          iterationNumber++;
-          sciPhys =
-            new G4PVPlacement(rotTop,G4ThreeVector(-xBoxSciHalfLength + ((rowX+1)*2-1)*(sciBulk_x+defectHalfLength),
-	 				         yBoxSciHalfLength + separationFromBox + sciBulk_z,
-					         ((rowZ+1)*2-1)*(sciBulk_x+defectHalfLength) - zGasBoxPosition),
-					         sciLog, "sciPhys", worldLog, false, iterationNumber);
-      }
-    }
-  }
-
-  //PLANES ZY
-  if((sideCoverage >> 3) & 0x0001){ // bit4 left (from beam point of view) wall
-    /*
-    for(G4int rowZ=0;rowZ<numberOfRowsZ;rowZ++){
-      for(G4int rowY=0;rowY<numberOfRowsY;rowY++){
-        iterationNumber++;
-        sciPhys =
-          new G4PVPlacement(rotLeft,G4ThreeVector(xBoxSciHalfLength + separationFromBox + sciBulk_z,
-	 				       -yBoxSciHalfLength + ((rowY+1)*2-1)*(sciBulk_x+defectHalfLength),
-					       ((rowZ+1)*2-1)*(sciBulk_x+defectHalfLength)),
-                                               sciLog, "sciPhys", worldLog, false, iterationNumber);
-      }
-    }
-    */
-    for(G4int rowZ=0;rowZ<6;rowZ++){
-      for(G4int rowY=0;rowY<4;rowY++){
-        iterationNumber++;
-        sciPhys =
-          new G4PVPlacement(rotLeft,G4ThreeVector(xBoxSciHalfLength + separationFromBox + sciBulk_z,
-						  (rowY-1.5)*2*(sciBulk_x+defectHalfLength),
-						  zBoxSciHalfLength+(rowZ-2.5)*2*(sciBulk_x+defectHalfLength) - zGasBoxPosition),
-                                               sciLog, "sciPhys", worldLog, false, iterationNumber);
-      }
-    }
-
-  }
-
-  if((sideCoverage >> 4) & 0x0001){ // bit5 right (from beam point of view) wall
-    /*
-    for(G4int rowZ=0;rowZ<numberOfRowsZ;rowZ++){
-      for(G4int rowY=0;rowY<numberOfRowsY;rowY++){
-        iterationNumber++;
-        sciPhys =
-          new G4PVPlacement(rotRight,G4ThreeVector(-(xBoxSciHalfLength + separationFromBox + sciBulk_z),
-	 				       -yBoxSciHalfLength + ((rowY+1)*2-1)*(sciBulk_x+defectHalfLength),
-					       ((rowZ+1)*2-1)*(sciBulk_x+defectHalfLength)),
-                                               sciLog, "sciPhys", worldLog, false, iterationNumber);
-      }
-    }
-    */
-
-    for(G4int rowZ=0;rowZ<2;rowZ++){
-      for(G4int rowY=0;rowY<2;rowY++){
-	      iterationNumber++;
-        sciPhys =
-          new G4PVPlacement(rotRight,G4ThreeVector(-(xBoxSciHalfLength + separationFromBox + sciBulk_z),
-						   (rowY-0.5)*2*(sciBulk_y+defectHalfLength),
-						   zBoxSciHalfLength+(rowZ-0.5)*2*(sciBulk_x+defectHalfLength) - zGasBoxPosition), 
-						   sciLog, "sciPhys", worldLog, false, iterationNumber);
-
-      }
-    }
-
-
-  }
-
-  if((sideCoverage >> 5) & 0x0001){ // bit6 (msb) beam entrance wall
-    for(G4int rowX=0;rowX<numberOfRowsX;rowX++){
-      for(G4int rowY=0;rowY<numberOfRowsY;rowY++){
-        iterationNumber++;
-        sciPhys =
-          new G4PVPlacement(rotBack,G4ThreeVector(-xBoxSciHalfLength + ((rowX+1)*2-1)*(sciBulk_x+defectHalfLength),
-	 				          -yBoxSciHalfLength + ((rowY+1)*2-1)*(sciBulk_x+defectHalfLength),
-					          -separationFromBox - sciBulk_z - zGasBoxPosition),
-			                          sciLog, "sciPhys", worldLog, false, iterationNumber);
-      }
-    }
-  }
 
   //------------------------------------------------
   // Sensitive detectors

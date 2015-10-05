@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol 
+//*-- AUTHOR : Hector Alvarez Pol    hapolyo@usc.es
 //*-- Date: 04/2008
-//*-- Last Update: 07/01/15
+//*-- Last Update:
 // --------------------------------------------------------------
 // Description:
 //   SD for the Scintillators
@@ -66,6 +66,7 @@ G4bool ActarSimSciSD::ProcessHits(G4Step* aStep,G4TouchableHistory*){
   // Invoked by G4SteppingManager for each step
   //
   G4double edep = aStep->GetTotalEnergyDeposit();
+  //G4double edep = -aStep->GetDeltaEnergy()/MeV;
 
   if(edep==0.) return false;
 

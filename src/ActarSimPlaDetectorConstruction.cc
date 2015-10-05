@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez
+//*-- AUTHOR : Hector Alvarez    hapolyo@usc.es
 //*-- Date: 04/2008
-//*-- Last Update: 16/12/14 by Hector Alvarez
+//*-- Last Update: 17/05/08 by Hector Alvarez
 // --------------------------------------------------------------
 // Description:
-//   Scintillator plastic detector description
+//   Scintillator detector description
 //
 // --------------------------------------------------------------
 // Comments:
@@ -45,7 +45,8 @@ ActarSimPlaDetectorConstruction(ActarSimDetectorConstruction* det)
   //
 
 
-  SetPlaBulkMaterial("BC408");
+  //SetPlaBulkMaterial("BC408");
+  SetPlaBulkMaterial("Mylar");
 
 
   SetSideCoverage(1);
@@ -81,6 +82,7 @@ G4VPhysicalVolume* ActarSimPlaDetectorConstruction::Construct(G4LogicalVolume* w
 
 
 G4VPhysicalVolume* ActarSimPlaDetectorConstruction::ConstructPla(G4LogicalVolume* worldLog) {
+ 
     
   //
 
@@ -162,8 +164,6 @@ G4VPhysicalVolume* ActarSimPlaDetectorConstruction::ConstructPla(G4LogicalVolume
 	G4LogicalVolume* logicHodo  = new G4LogicalVolume(solidHodo,Vacuum,"logichodo",0,0,0);
 	G4VPhysicalVolume* physiHodo  = new G4PVPlacement(0,G4ThreeVector(0.,yHodo,zHodo),logicHodo,"physihodo",worldLog,false,0);
     
-	if(physiHodo){;}
-
 	G4VisAttributes* logicHodo_VisAtt = new G4VisAttributes(G4Colour(0,0,1.0));
 	//logicHodo->SetVisAttributes(G4VisAttributes::GetInvisible());
 	logicHodo->SetVisAttributes(logicHodo_VisAtt);
@@ -212,6 +212,7 @@ void ActarSimPlaDetectorConstruction::UpdateGeometry() {
   //
   // Updates Scintillator detector
   //
+
   Construct(detConstruction->GetWorldLogicalVolume());
   G4RunManager::GetRunManager()->
     DefineWorldVolume(detConstruction->GetWorldPhysicalVolume());

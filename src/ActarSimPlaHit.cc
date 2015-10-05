@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol
+//*-- AUTHOR : Hector Alvarez Pol     hapolyo@usc.es
 //*-- Date: 04/2008
-//*-- Last Update: 16/12/14 by Hector Alvarez
+//*-- Last Update:
 // --------------------------------------------------------------
 // Description:
-//   A plastic (scintillator) hit
+//   A Scintillator hit
 //
 // --------------------------------------------------------------
 // Comments:
@@ -24,13 +24,21 @@ ActarSimPlaHit::ActarSimPlaHit(){
   //
 	
 	detectorID = 0;
+	
+	detCenterCoordinateX=0.; // center of the present silicon, dypang 090130
+	detCenterCoordinateY=0.; // center of the present silicon, dypang 090130
+	detCenterCoordinateZ=0.; // center of the present silicon, dypang 090130
+	
 	xpos=0;
 	ypos=0;
 	zpos=0;
+
+  type = 0;
+  copy = 0;
+
   time = 0.;
   energy = 0.;
-  eBeforePla = 0.;
-  eAfterPla = 0.;
+
   eventID = 0;
   runID = 0;
 	trackID=0;
@@ -39,7 +47,6 @@ ActarSimPlaHit::ActarSimPlaHit(){
   particleCharge=0.;
   particleMass=0.;
 
-  stepsContributing = 0; 
 }
 
 ActarSimPlaHit::~ActarSimPlaHit(){
@@ -53,7 +60,17 @@ void ActarSimPlaHit::print(void){
   //
   // Printing data information
   //
-   
+    /*
+    G4cout << "-------------------------------------------" << G4endl;
+    G4cout << "------- ActarSimSciHit::print() ---------" << G4endl;
+    G4cout << " type: " << type
+    << ", copy: " << copy
+    << G4endl;
+    G4cout << " energy: " << energy / MeV << " MeV"
+    << ", time: " << time / ns << " ns"
+    << G4endl;
+    G4cout << "-------------------------------------------" << G4endl;
+  */
 }
 
 

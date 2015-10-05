@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol (hapol@fpddux.usc.es)
 //*-- Date: 11/2004
-//*-- Last Update: 07/01/15
+//*-- Last Update: 05/05/08
 // --------------------------------------------------------------
 // Description:
 //   Controls the actions to perform before and after a run.

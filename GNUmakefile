@@ -8,6 +8,9 @@ name := actarsim
 G4TARGET := $(name)
 G4EXLIB := true
 
+EXTRALIBS += -L$(CRYHOME)/lib -lCRY
+CPPFLAGS  += -I$(CRYHOME)/src
+
 G4TMPDIR = $(G4TMP)/$(G4SYSTEM)/$(name)
 
 ifndef G4INSTALL
@@ -22,6 +25,11 @@ UNAME_S := $(shell uname -s)
 all: lib bin sharedlib
 
 include $(G4INSTALL)/config/binmake.gmk
+
+check:
+ifndef CRYHOME
+	@echo CRYHOME not defined, please setup CRY using: source ../setup; false
+endif
 
 #######  ROOT includes and libs (in case G4UIROOT is not defined) ########
 ifndef INC_ROOT

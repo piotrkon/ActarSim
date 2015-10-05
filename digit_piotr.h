@@ -6,6 +6,9 @@
 //
 // --------------------------------------------------------------
 //
+//
+//*--Piotr 14092015: In CalculatePositionAfterDrift -> remove the limits on X and Z to set the position 
+//
 // --------------------------------------------------------------
 // Technical details...
 //  diffusion: gaussian with sigma = sqrt(2Dx/w)
@@ -777,10 +780,12 @@ public:
   //                             Double_t k1n, Double_t k2n, Double_t k3n,
   //                             projectionOnPadPlane* pro,
   //                             TClonesArray* clo, Int_t &numberOfPadsBeforeThisLoopStarted,TTree *T);
-  void CalculatePadsWithCharge(Double_t k1p, Double_t k2p, Double_t k3p,
-                               Double_t k1n, Double_t k2n, Double_t k3n,
-                               projectionOnPadPlane* pro,
-                               TClonesArray* clo, Int_t &numberOfPadsBeforeThisLoopStarted,TTree *T);
+  //void CalculatePadsWithCharge(Double_t k1p, Double_t k2p, Double_t k3p,
+  //                             Double_t k1n, Double_t k2n, Double_t k3n,
+  //                             projectionOnPadPlane* pro,
+  //                             TClonesArray* clo, Int_t &numberOfPadsBeforeThisLoopStarted,TTree *T);
+  void CalculatePadsWithCharge(projectionOnPadPlane* pro,
+                               TClonesArray* clo, Int_t &numberOfPadsBeforeThisLoopStarted);
 //                                TClonesArray* clo, TTree* tree);
 
   ClassDef(driftManager,1);
@@ -861,11 +866,14 @@ Int_t driftManager::CalculatePositionAfterDrift(projectionOnPadPlane* pro) {
   random->SetSeed(0);
   if(padsGeo->GetEndCapMode()==1) ;
   else{
+    //THIS PART IS NOT NEEDED SINCE WE ALREADY RECORD STEPS INTO GAS BOX (Piotr)
+    /*
     if( pro->GetTrack()->GetZPre() <= 0 ||
 	pro->GetTrack()->GetZPre() >= 2 * padsGeo->GetZLength() ||
 	pro->GetTrack()->GetZPost() <= 0 ||
 	pro->GetTrack()->GetZPost() >= 2 * padsGeo->GetZLength() ) pro->SetPosition(5); // out of range
-    else if(rhoPre  < padsGeo->GetDeltaProximityBeam() ||
+	else*/
+    if(rhoPre  < padsGeo->GetDeltaProximityBeam() ||
 	    rhoPost < padsGeo->GetDeltaProximityBeam() ) pro->SetPosition(1); //if any point is closer to the (0,0,z) than a delta
     else if(rhoPre  < padsGeo->GetSizeBeamShielding() &&
 	    rhoPost < padsGeo->GetSizeBeamShielding() ) pro->SetPosition(2); //if both points lies within the beamShielding
@@ -976,7 +984,7 @@ Int_t driftManager::CalculatePositionAfterDrift(projectionOnPadPlane* pro) {
   if(DIGI_DEBUG>1)
     cout <<  "________________________________________________________" << endl
 	 << " Output of driftManager::CalculatePositionAfterDrift()" << endl
-	 <<  "pre = (" <<  pro->GetTrack()->GetXPre() << ","
+	 <<  " pre = (" <<  pro->GetTrack()->GetXPre() << ","
 	 <<  pro->GetTrack()->GetYPre() << ","
 	 <<  pro->GetTrack()->GetZPre() << ")" << endl
 	 <<  " post = (" <<  pro->GetTrack()->GetXPost() << ","
@@ -992,10 +1000,12 @@ Int_t driftManager::CalculatePositionAfterDrift(projectionOnPadPlane* pro) {
   return 1;
 }
 
-void driftManager::CalculatePadsWithCharge(Double_t k1p, Double_t k2p, Double_t k3p,
+/*void driftManager::CalculatePadsWithCharge(Double_t k1p, Double_t k2p, Double_t k3p,
                                            Double_t k1n, Double_t k2n, Double_t k3n,
                                            projectionOnPadPlane* pro,
-                                           TClonesArray* clo, Int_t &numberOfPadsBeforeThisLoopStarted,TTree* T) {
+                                           TClonesArray* clo, Int_t &numberOfPadsBeforeThisLoopStarted,TTree* T) {*/
+void driftManager::CalculatePadsWithCharge(projectionOnPadPlane* pro,
+                                           TClonesArray* clo, Int_t &numberOfPadsBeforeThisLoopStarted) {
 //                                            TClonesArray* clo, TTree* tree) {
   // calculates the pads with charge after the electron swarm drift
   //
@@ -1209,7 +1219,6 @@ void driftManager::CalculatePadsWithCharge(Double_t k1p, Double_t k2p, Double_t 
  
     for(Int_t iterOnPads=0;iterOnPads<numberOfPadsWithSignal;iterOnPads++){
       padUnderTest = padsGeo->CalculatePad(rowList[iterOnPads],columnList[iterOnPads]);
- 
 
       //Float_t charge=chargeOnPads[rowList[iterOnPads]-1][columnList[iterOnPads]-1];
       //Float_t charge=chargeOnPadsAmplified[rowList[iterOnPads]-1][columnList[iterOnPads]-1];

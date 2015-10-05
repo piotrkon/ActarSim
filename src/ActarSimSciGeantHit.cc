@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol 
+//*-- AUTHOR : Hector Alvarez Pol     hapolyo@usc.es
 //*-- Date: 04/2008
-//*-- Last Update: 07/01/15
+//*-- Last Update:
 // --------------------------------------------------------------
 // Description:
 //   A Geant Hit in the Scintillator volume. It represents

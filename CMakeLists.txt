@@ -20,6 +20,24 @@ endif()
 
 include(${Geant4_USE_FILE})
 
+
+#----------------------------------------------------------------------------
+# Add the executable, and link it to the Geant4 libraries
+#
+#set(ENV{PATH} "/home/martink")
+#set(CRY_LIB "/home/pablom/Documents/cry/cry_v1.7/lib/libCRY.a")
+#set(CRY_LIB "/home/pablom/Documents/geant4/work/MTP/cry/cry_v1.7/lib/libCRY.a")
+#"/home/carlos/geant4/MPWork/MTP/cry/cry_v1.7/lib/libCRY.a"
+#set(CRY_LIB $ENV{G4CRYLIBDIR})
+
+set(CRY_LIB "$ENV{CRYHOME}/lib/libCRY.a")
+find_library(CRY_LIB CRY $ENV{CRY_LIB_PATH})
+
+#add_executable(A01app A01app.cc ${sources} ${headers})
+#target_link_libraries(A01app ${Geant4_LIBRARIES} ${CRY_LIB})
+
+
+
 #----------------------------------------------------------------------------
 # Cmake Path for installation
 #
@@ -127,14 +145,14 @@ SET(ActarSim_LIBRARY_PROPERTIES ${ActarSim_LIBRARY_PROPERTIES}
 
 
 add_library(actar SHARED ActarSim.cc ${ActarSim_DICTIONARY} ${sources} ${headers})
-target_link_libraries(actar ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+target_link_libraries(actar ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} ${CRY_LIB})
 set_target_properties(actar PROPERTIES ${ActarSim_LIBRARY_PROPERTIES})
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(actarsim ActarSim.cc ${ActarSim_DICTIONARY} ${sources} ${headers})
-target_link_libraries(actarsim ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+target_link_libraries(actarsim ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} ${CRY_LIB})
 add_dependencies(actarsim actar)
 
 #----------------------------------------------------------------------------
@@ -144,6 +162,7 @@ add_dependencies(actarsim actar)
 #
 set(ACTARSIM_SCRIPTS
 gui.mac
+vis_cosmic.mac
 vis_actar.mac 
 vis_maiko.mac 
 vis_kine.mac 

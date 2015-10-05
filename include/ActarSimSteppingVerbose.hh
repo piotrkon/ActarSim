@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol hapol@fpddux.usc.es
 //*-- Date: 11/2004
-//*-- Last Update: 07/01/15
+//*-- Last Update: 28/10/05
 // --------------------------------------------------------------
 // Description:
 //   Controls the verbosity during the step (please, not too much:-)

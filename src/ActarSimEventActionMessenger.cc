@@ -56,7 +56,8 @@ ActarSimEventActionMessenger::~ActarSimEventActionMessenger() {
 }
 
 
-void ActarSimEventActionMessenger::SetNewValue(G4UIcommand* command,G4String newValue) {
+void ActarSimEventActionMessenger::SetNewValue(
+                                        G4UIcommand* command,G4String newValue) {
   //
   // Setting the values from the interfaces
   //

@@ -1,6 +1,6 @@
-//*-- AUTHOR : Hector Alvarez-Pol 
+//*-- AUTHOR : Hector Alvarez-Pol hapol@fpddux.usc.es
 //*-- Date: 05/2005
-//*-- Last Update: 07/01/15
+//*-- Last Update: 28/10/05
 // --------------------------------------------------------------
 // Description:
 //   Track structure
@@ -17,6 +17,7 @@
 //#include "G4Types.hh"
 
 #include "TROOT.h"  //for including Rtypes.h
+
 
 //#ifndef __CINT__
 //#include "G4String.hh" //Explicit inclusion for root dictionary

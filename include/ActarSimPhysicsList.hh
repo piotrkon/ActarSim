@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol  hapol@fpddux.usc.es
 //*-- Date: 11/2004
-//*-- Last Update: 16/12/14
+//*-- Last Update: 28/10/05
 // --------------------------------------------------------------
 // Description:
 //   General physics package

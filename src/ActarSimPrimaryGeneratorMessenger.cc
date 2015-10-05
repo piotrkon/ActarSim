@@ -1,7 +1,8 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol  hapol@fpddux.usc.es
 //*-- Date: 11/2004
-//*-- Last Update: 16/12/14 by Hector Alvarez Pol
+//*-- Last Update: 03/04/06
+//*-- modified by: B. Fernandez-Dominguez bfd@ns.ph.liv.ac.uk
 // --------------------------------------------------------------
 // Description:
 //   Messenger for the primary event generator.
@@ -38,6 +39,27 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
 
   G4bool omitable;
   G4UIparameter* parameter;
+
+  //cosmic commands
+  CRYDir = new G4UIdirectory("/CRY/");
+  CRYDir->SetGuidance("CRY initialization");
+   
+  FileCmd = new G4UIcmdWithAString("/CRY/file",this);
+  FileCmd->SetGuidance("This reads the CRY definition from a file");
+  FileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+   
+  InputCmd = new G4UIcmdWithAString("/CRY/input",this);
+  InputCmd->SetGuidance("CRY input lines");
+  InputCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  UpdateCmd = new G4UIcmdWithoutParameter("/CRY/update",this);
+  UpdateCmd->SetGuidance("Update CRY definition.");
+  UpdateCmd->SetGuidance("This command MUST be applied before \"beamOn\" ");
+  UpdateCmd->SetGuidance("if you changed the CRY definition.");
+  UpdateCmd->AvailableForStates(G4State_Idle);
+
+  MessInput = new std::string;
+
 
   gunDir = new G4UIdirectory("/ActarSim/gun/");
   gunDir->SetGuidance("PrimaryGenerator control");
@@ -85,19 +107,6 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   emittanceCmd->SetParameterName("emittance",false);
   emittanceCmd->SetDefaultValue(1.);
   emittanceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
-
-  beamDirectionCmd = new G4UIcmdWith3Vector("/ActarSim/gun/beamDirection",this);
-  beamDirectionCmd->SetGuidance("Set beam momentum direction.");
-  beamDirectionCmd->SetGuidance("Direction needs not to be a unit vector.");
-  beamDirectionCmd->SetParameterName("Px","Py","Pz",true,true);
-  beamDirectionCmd->SetRange("Px != 0 || Py != 0 || Pz != 0");
-
-  beamPositionCmd = new G4UIcmdWith3VectorAndUnit("/ActarSim/gun/beamPosition",this);
-  beamPositionCmd->SetGuidance("Set beam starting position.");
-  beamPositionCmd->SetParameterName("X","Y","Z",true,true);
-  beamPositionCmd->SetDefaultUnit("cm");
-  //beamPositionCmd->SetUnitCategory("Length");
-  //beamPositionCmd->SetUnitCandidates("microm mm cm m km");
 
   beamRadiusAtEntranceCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/beamRadiusAtEntrance",this);
   beamRadiusAtEntranceCmd->SetGuidance("Selects the beam radius at entrance of ACTAR.");
@@ -200,7 +209,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   randomThetaValCmd->SetParameter(parameter);
 
   randomPhiValCmd = new G4UIcommand("/ActarSim/gun/randomPhiVal", this);
-  randomPhiValCmd->SetGuidance("Sets the limits in the Theta angle for the scattered particle.");
+  randomPhiValCmd->SetGuidance("Sets the limist in the Theta angle for the scattered particle.");
   randomPhiValCmd->SetGuidance("The value is randomly chosen between the limits.");
   parameter = new G4UIparameter("phiMin", 'd', omitable = true);
   parameter->SetDefaultValue(0.);
@@ -500,7 +509,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   KineUserThetaCMCmd->SetParameterName("userThetaCM",false);
   KineUserThetaCMCmd->SetRange("userThetaCM>=0.");
   KineUserThetaCMCmd->SetUnitCategory("Angle");
-  KineUserThetaCMCmd->SetDefaultValue(0.);
+  KineUserThetaCMCmd->SetDefaultValue(0.5);
   KineUserThetaCMCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 // user set the phi angle of particles, useful when testing the kinematics reconstruction methods
@@ -518,6 +527,21 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   vertexPositionCmd->SetDefaultUnit("cm");
 
 // --------------------------------------------------------------end of commands for Kine dypang 080227
+
+
+// --------------------------------------------------------------commands for CRY
+
+  reactionFromCRYCmd = new G4UIcmdWithAString("/ActarSim/gun/reactionFromCRY",this);
+  reactionFromCRYCmd->SetGuidance("Select a reaction using CRY");
+  reactionFromCRYCmd->SetGuidance("  Choice : on(default), off");
+  reactionFromCRYCmd->SetParameterName("choice",true);
+  reactionFromCRYCmd->SetDefaultValue("on");
+  reactionFromCRYCmd->SetCandidates("on off");
+  reactionFromCRYCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+
+// --------------------------------------------------------------end of commands for CRY
+
 
   //commands affecting individual particles
   energyCmd  = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/energy",this);
@@ -541,6 +565,18 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   //positionCmd->SetUnitCategory("Length");
   //positionCmd->SetUnitCandidates("microm mm cm m km");
 
+  EntranceYPositionCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/EntranceYPosition",this);
+  EntranceYPositionCmd->SetGuidance("Set starting Y position of the particle (0 is the midle of GasBox).");
+  EntranceYPositionCmd->SetParameterName("entranceY",true,true);
+  EntranceYPositionCmd->SetDefaultValue(0.);
+  EntranceYPositionCmd->SetDefaultUnit("cm");
+
+  EntranceZPositionCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/EntranceZPosition",this);
+  EntranceZPositionCmd->SetGuidance("Set starting Z position of the particle.");
+  EntranceZPositionCmd->SetParameterName("entranceZ",true,true);
+  EntranceZPositionCmd->SetDefaultValue(0.);
+  EntranceZPositionCmd->SetDefaultUnit("cm");
+
   timeCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/time",this);
   timeCmd->SetGuidance("Set initial time of the particle.");
   timeCmd->SetParameterName("t0",true,true);
@@ -549,7 +585,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   //timeCmd->SetUnitCandidates("ns ms s");
 
   randomVertexZPositionCmd = new G4UIcmdWithAString("/ActarSim/gun/randomVertexZPosition",this);
-  randomVertexZPositionCmd->SetGuidance("Randomize the reaction vertex Z position");
+  randomVertexZPositionCmd->SetGuidance("Randamize the reaction vertex Z position");
   randomVertexZPositionCmd->SetGuidance("Choice : on(default), off");
   randomVertexZPositionCmd->SetParameterName("choice",true);
   randomVertexZPositionCmd->SetDefaultValue("on");
@@ -615,12 +651,19 @@ ActarSimPrimaryGeneratorMessenger::~ActarSimPrimaryGeneratorMessenger() {
   //
   // Destructor
   //
+  delete CRYDir;
+  delete InputCmd;
+  delete UpdateCmd;
+  delete FileCmd;
+
   delete gunDir;
   delete listCmd;
   delete particleCmd;
   delete energyCmd;
   delete directionCmd;
   delete positionCmd;
+  delete EntranceYPositionCmd;
+  delete EntranceZPositionCmd;
   delete timeCmd;
   delete randomVertexZPositionCmd;
   delete randomVertexZPositionRangeCmd;
@@ -631,8 +674,6 @@ ActarSimPrimaryGeneratorMessenger::~ActarSimPrimaryGeneratorMessenger() {
   delete realisticBeamCmd;
   delete beamInteractionCmd;
   delete emittanceCmd;
-  delete beamDirectionCmd;
-  delete beamPositionCmd;
   delete beamRadiusAtEntranceCmd;
   delete reactionFromEvGenCmd;
   delete reactionFromCrossSectionCmd;
@@ -670,6 +711,8 @@ ActarSimPrimaryGeneratorMessenger::~ActarSimPrimaryGeneratorMessenger() {
   delete KineUserPhiAngleCmd;           // in degrees
   delete vertexPositionCmd;
 // end of Kine part, dypang 080228
+
+  delete reactionFromCRYCmd;
 }
 
 void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
@@ -677,6 +720,23 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
   //
   // Setting the values from the interface
   //
+
+  if( command == InputCmd )
+   { 
+     actarSimActionGun->InputCRY();
+     (*MessInput).append(newValues);
+     (*MessInput).append(" ");
+   }
+
+  if( command == UpdateCmd )
+   { 
+     actarSimActionGun->UpdateCRY(MessInput); 
+     *MessInput = "";
+   }
+
+  if( command == FileCmd )
+   { actarSimActionGun->CRYFromFile(newValues); }
+
   if( command==listCmd )
     particleTable->DumpTable();
 
@@ -687,7 +747,7 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
       fShootIon = false;
       G4ParticleDefinition* pd = particleTable->FindParticle(newValues);
       if(pd != 0)
-	{ actarSimActionGun->SetParticleDefinition( pd ); }
+	{ actarSimActionGun->SetParticleDefinition(pd);}
     }
   }
 
@@ -699,12 +759,6 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
 
   if( command == emittanceCmd)
     actarSimActionGun->SetEmittance(emittanceCmd->GetNewDoubleValue(newValues));
-
-  if( command==beamDirectionCmd )
-    actarSimActionGun->SetBeamMomentumDirection(beamDirectionCmd->GetNew3VectorValue(newValues));
-
-  if( command==beamPositionCmd )
-    actarSimActionGun->SetBeamPosition(beamPositionCmd->GetNew3VectorValue(newValues));
 
   if(command == beamRadiusAtEntranceCmd)
     actarSimActionGun->SetBeamRadiusAtEntrance(beamRadiusAtEntranceCmd->GetNewDoubleValue(newValues));
@@ -859,6 +913,9 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
 
 // ---------------- end of corresponding part for Kine, dypang 080228
 
+  if( command == reactionFromCRYCmd )
+    actarSimActionGun->SetReactionFromCRYFlag(newValues);
+
   if( command == reactionQCmd )
     actarSimActionGun->
       SetReactionQ(reactionQCmd->GetNewDoubleValue(newValues));
@@ -882,6 +939,12 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
 
   if( command==timeCmd )
     actarSimActionGun->SetParticleTime(timeCmd->GetNewDoubleValue(newValues));
+
+  if( command==EntranceYPositionCmd)
+    actarSimActionGun->SetEntranceYPosition(EntranceYPositionCmd->GetNewDoubleValue(newValues));
+
+  if( command==EntranceZPositionCmd)
+    actarSimActionGun->SetEntranceZPosition(EntranceZPositionCmd->GetNewDoubleValue(newValues));
 
 // vertexZPosition dypang 080704
   if( command==vertexZPositionCmd )
@@ -909,7 +972,9 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
     actarSimActionGun->SetNumberOfParticles(numberCmd->GetNewIntValue(newValues));
 
   if( command==ionCmd )
-    IonCommand(newValues);
+    {
+      IonCommand(newValues);
+    }
 }
 
 

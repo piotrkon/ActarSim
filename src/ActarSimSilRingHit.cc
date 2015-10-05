@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol
+//*-- AUTHOR : Hector Alvarez Pol     hapolyo@usc.es
 //*-- Date: 04/2008
-//*-- Last Update: 07/01/2015
+//*-- Last Update:
 // --------------------------------------------------------------
 // Description:
 //   A Silicon hit

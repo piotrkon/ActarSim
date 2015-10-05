@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol
+//*-- AUTHOR : Hector Alvarez Pol     hapolyo@usc.es
 //*-- Date: 04/2008
-//*-- Last Update: 07/01/15
+//*-- Last Update:
 // --------------------------------------------------------------
 // Description:
 //   A Geant Hit in the Silicon volume. It represents
@@ -121,24 +121,25 @@ void ActarSimSilRingGeantHit::Print(){
   // Prints full information about the calGeantHit
   //
   G4cout << "##################################################################"
-	       << G4endl
-	       << "###############     ActarSimSilRingGeantHit::Print()    ###################" << G4endl
-	       << "trackID: " << trackID
-	       << ", parentID: " << parentID
-	       << ", particleID: " << particleID
-	       << ", particleCharge: " << particleCharge << G4endl;
+	 << G4endl
+	 << "###############     ActarSimSilRingGeantHit::Print()    ###################" << G4endl
+	 << "trackID: " << trackID
+	 << ", parentID: " << parentID
+	 << ", particleID: " << particleID
+	 << ", particleCharge: " << particleCharge << G4endl;
   G4cout << "detID: " << detID
-	       << ", detName: " << detName
-	       << ", postDetName: " << postDetName
-	       << ", preDetName: " << preDetName
-	       << G4endl;
+	 << ", detName: " << detName
+	 << ", postDetName: " << postDetName
+	 << ", preDetName: " << preDetName
+	 << G4endl;
   G4cout << "edep: " << edep  / MeV << " MeV"
-	       << ", pos: " << pos << " mm" << G4endl
-	       << ", prePos: " << prePos << " mm" << G4endl;
+	 << ", pos: " << pos << " mm" << G4endl
+	 << ", prePos: " << prePos << " mm" << G4endl;
   G4cout << "toF: " << toF  / ns << " ns" << ", localPos: " << localPos << " mm"
-	       << ", localPrePos: " << localPrePos << " mm" << G4endl;
+	 << ", localPrePos: " << localPrePos << " mm" << G4endl;
   G4cout << "##################################################################"
-	       << G4endl;
+	 << G4endl;
+
 }
 
 

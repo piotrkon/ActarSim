@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol hapol@fpddux.usc.es
 //*-- Date: 11/2004
-//*-- Last Update: 1/12/14
+//*-- Last Update: 05/05/08
 // --------------------------------------------------------------
 // Description:
 //   Detector construction and complementary definitions
@@ -25,6 +25,7 @@
 #include "ActarSimUniformEMField.hh"
 #include "globals.hh"
 
+class G4Sphere;
 class G4Box;
 class G4Tubs;
 class G4LogicalVolume;
@@ -60,6 +61,7 @@ private:
 
   // Volumes
   G4Box* solidWorld;
+  //G4Sphere* solidWorld;
 
   // Logical volumes
   G4LogicalVolume* worldLog;      //pointer to logic world
@@ -104,6 +106,7 @@ private:
 
   //Control of the geometry of the experiment
   G4String MaikoGeoIncludedFlag;
+  G4String CosmicIncludedFlag;
   G4String gasGeoIncludedFlag;
   G4String silGeoIncludedFlag;
   G4String sciGeoIncludedFlag;
@@ -134,7 +137,7 @@ public:
   ActarSimPlaSD* GetPlaSD(void){return plaSD;}
 
   G4VPhysicalVolume* Construct();
-
+  
   void SetXGasChamber(G4double val){chamberSizeX = val;} 
   void SetYGasChamber(G4double val){chamberSizeY = val;} 
   void SetZGasChamber(G4double val){chamberSizeZ = val;} 

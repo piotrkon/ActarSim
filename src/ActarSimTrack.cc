@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol 
+//*-- AUTHOR : Hector Alvarez-Pol hapol@fpddux.usc.es
 //*-- Date: 05/2005
-//*-- Last Update: 07/01/15
+//*-- Last Update: 03/04/06
 // --------------------------------------------------------------
 // Description:
 //   Track structure

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////// 
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol hapol@fpddux.usc.es
 //*-- Date: 05/2005
-//*-- Last Update:  1/12/014
+//*-- Last Update:  28/10/05
 // --------------------------------------------------------------
 // Description:
 //   Data definition 

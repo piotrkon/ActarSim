@@ -1,7 +1,8 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol
+//*-- AUTHOR : Hector Alvarez-Pol  (hapol@fpddux.usc.es)
 //*-- Date: 11/2004
-//*-- Last Update: 16/12/14 by Hector Alvarez Pol
+//*-- Last Update: 03/04/06
+//*-- Modified by B. Fernandez-Dominguez bfd@ns.ph.liv.ac.uk
 // --------------------------------------------------------------
 // Description:
 //   Messenger for the primary generator.
@@ -36,6 +37,12 @@ private:
   ActarSimPrimaryGeneratorAction* actarSimActionGun;
   G4ParticleTable* particleTable;
 
+    G4UIdirectory*               CRYDir;
+    G4UIcmdWithAString*          FileCmd; 
+    G4UIcmdWithAString*          InputCmd;
+    G4UIcmdWithoutParameter*     UpdateCmd;
+    std::string* MessInput;
+
   G4UIdirectory*               gunDir;
   G4UIdirectory*               CineDir;
   G4UIcmdWithoutParameter*     listCmd;
@@ -57,6 +64,8 @@ private:
   G4UIcmdWithADoubleAndUnit*   energyCmd;
   G4UIcmdWith3Vector*          directionCmd;
   G4UIcmdWith3VectorAndUnit*   positionCmd;
+  G4UIcmdWithADoubleAndUnit*   EntranceYPositionCmd;
+  G4UIcmdWithADoubleAndUnit*   EntranceZPositionCmd;
   G4UIcmdWithADoubleAndUnit*   timeCmd;
   G4UIcmdWithAString*          randomVertexZPositionCmd;
   G4UIcommand*                 randomVertexZPositionRangeCmd;
@@ -65,8 +74,6 @@ private:
   G4UIcmdWithAnInteger*        numberCmd;
 
   G4UIcmdWithADouble*          emittanceCmd;             // emittance (in mm mrad)
-  G4UIcmdWith3Vector*          beamDirectionCmd;
-  G4UIcmdWith3VectorAndUnit*   beamPositionCmd;
   G4UIcmdWithADoubleAndUnit*   beamRadiusAtEntranceCmd;  // emittance (in position at detector entrance)
 
 // for Kine, dypang 080228
@@ -85,6 +92,9 @@ private:
   G4UIcmdWith3VectorAndUnit*   vertexPositionCmd;
 // end of Kine part, dypang 080228
 
+// for CRY
+  G4UIcmdWithAString*          reactionFromCRYCmd;
+
   G4UIcommand* incidentIonCmd;
   G4UIcommand* targetIonCmd;
   G4UIcommand* scatteredIonCmd;
@@ -93,6 +103,7 @@ private:
   G4UIcmdWithADoubleAndUnit* reactionQCmd;
   G4UIcmdWithADoubleAndUnit* labEnergyCmd;
   G4UIcmdWithADoubleAndUnit* thetaLabAngleCmd;
+
 
   G4UIcommand*                 ionCmd;
 
