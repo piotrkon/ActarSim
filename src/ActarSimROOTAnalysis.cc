@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol  hapol@fpddux.usc.es
+//*-- AUTHOR : Hector Alvarez-Pol
 //*-- Date: 03/2005
-//*-- Last Update: 06/05/08
+//*-- Last Update: 07/01/15
 // --------------------------------------------------------------
 // Description:
 //   ROOT-based analysis functionality
@@ -150,10 +150,8 @@ void ActarSimROOTAnalysis::InitAnalysisForExistingDetectors() {
   //TFile for storing the info
   if(!simFile){
     //simFile = new TFile("simFile.root","RECREATE");
-    simFile = new TFile("root_files/simFile.root","RECREATE");
-    //simFile = new TFile("root_files_new/simFile.root","RECREATE");
-    //simFile = new TFile("/space/loureiro/simFiles/root_files_new/simFile.root","RECREATE");
-    //simFile = new TFile("Cona.root","RECREATE");
+    //simFile = new TFile("root_files/simFile.root","RECREATE");
+    simFile = new TFile("root_files/sim_files/simFile.root","RECREATE");
     simFile->cd();
 
     eventTree = new TTree("The_ACTAR_Event_Tree","Event_Tree");
@@ -614,38 +612,18 @@ void ActarSimROOTAnalysis::EndOfEventAction(const G4Event *anEvent) {
     theData->SetEnergyPrim1(energyPrim1);
     theData->SetEnergyPrim2(energyPrim2);
   }
-  /*
+
   //calling the actions defined for each detector
   //DPL jun2012 only silicon hits stored in ROOT file
-   G4int hitsCollectionID =G4SDManager::GetSDMpointer()->GetCollectionID("SilCollection");
-   G4HCofThisEvent* HCofEvent = anEvent->GetHCofThisEvent();
-   ActarSimSilGeantHitsCollection* hitsCollection =
-     (ActarSimSilGeantHitsCollection*) HCofEvent->GetHC(hitsCollectionID);
+  // G4int hitsCollectionID =G4SDManager::GetSDMpointer()->GetCollectionID("SilCollection");
+  // G4HCofThisEvent* HCofEvent = anEvent->GetHCofThisEvent();
+  // ActarSimSilGeantHitsCollection* hitsCollection =
+  //   (ActarSimSilGeantHitsCollection*) HCofEvent->GetHC(hitsCollectionID);
   //Number of ActarSimSilGeantHit (or steps) in the hitsCollection
-  G4int NbHits = hitsCollection->entries(); 
-  G4cout<<"Hits in the silicon "<< NbHits <<G4endl;
+  //G4int NbHits = hitsCollection->entries(); 
+  //G4cout<<"Hits in the silicon "<< NbHits <<G4endl;
   //if(NbHits){ 
   //G4cout<<"ActarSimROOTAnalysis----> EndOfEventAction() "<<gasAnal<<G4endl;
-  */
-  
-    G4int ScihitsCollectionID =G4SDManager::GetSDMpointer()->GetCollectionID("SciCollection");
-    G4HCofThisEvent* SciHCofEvent = anEvent->GetHCofThisEvent();
-    ActarSimSciGeantHitsCollection* ScihitsCollection =
-    (ActarSimSciGeantHitsCollection*) SciHCofEvent->GetHC(ScihitsCollectionID);
-    //Number of ActarSimSilGeantHit (or steps) in the hitsCollection
-    G4int SciNbHits = ScihitsCollection->entries(); 
-    //G4cout<<"Hits in the Scintillator "<< SciNbHits <<G4endl;
-   
-  
-   G4int GashitsCollectionID =G4SDManager::GetSDMpointer()->GetCollectionID("gasCollection");
-   G4HCofThisEvent* GasHCofEvent = anEvent->GetHCofThisEvent();
-    ActarSimGasGeantHitsCollection* GashitsCollection =
-     (ActarSimGasGeantHitsCollection*) GasHCofEvent->GetHC(GashitsCollectionID);
-   //Number of ActarSimSilGeantHit (or steps) in the hitsCollection
-  G4int GasNbHits = GashitsCollection->entries(); 
-  //G4cout<<"Hits in the Gas "<< GasNbHits <<G4endl;
-  
-
   if(gasAnal) gasAnal->EndOfEventAction(anEvent);
   if(silAnal) silAnal->EndOfEventAction(anEvent);
   if(silRingAnal) silRingAnal->EndOfEventAction(anEvent);
@@ -653,88 +631,11 @@ void ActarSimROOTAnalysis::EndOfEventAction(const G4Event *anEvent) {
   if(sciRingAnal) sciRingAnal->EndOfEventAction(anEvent);
   if(plaAnal) plaAnal->EndOfEventAction(anEvent);
 
-  if(GasNbHits!=0)eventTree->Fill();
-  //if(SciNbHits!=0 && GasNbHits!=0)eventTree->Fill();
+  eventTree->Fill();
   //}
   OnceAWhileDoIt();
 
 }
-
-/*
-void ActarSimROOTAnalysis::EndOfEventAction(const G4Event *anEvent,
-					       G4double EnerGas1,
-					       G4double EnerGas2,
-					       G4double TLGas1,
-					       G4double TLGas2,
-					       G4double PLPx,
-					       G4double PLPy,
-					       G4double PLPz) {
-  //
-  // TODO-> CORRECT THIS ASSYMETRY WITH R3BSIM!!!!!!!!???????
-  //
-
-  //  if (anEvent);
-  //  if (gSystem) gSystem->ProcessEvents();
-
-
-  //  G4cout << "The number of primary vertex is "
-  //	 <<  anEvent->GetNumberOfPrimaryVertex() << G4endl;
-
-
-  G4PrimaryVertex* myPVertex1 = anEvent->GetPrimaryVertex(0);
-  G4PrimaryVertex* myPVertex2 = 0;
-
-  if(anEvent->GetNumberOfPrimaryVertex()>1)
-    myPVertex2 = anEvent->GetPrimaryVertex(1);
-
-  // G4cout << "The number of Primaries in the first vertex is "
-  //     <<  myPVertex->GetNumberOfParticle() << G4endl;
-
-  G4PrimaryParticle* myPrim1 = myPVertex1->GetPrimary();
-  G4PrimaryParticle* myPrim2 = 0;
-  if(myPVertex2) myPrim2 = myPVertex2->GetPrimary();
-  G4ThreeVector momentumPrim1 = myPrim1->GetMomentum();
-  G4ThreeVector momentumPrim2;
-  if(myPrim2) momentumPrim2 = myPrim2->GetMomentum();
-  G4double massPrim1 = myPrim1->GetMass();
-  G4double massPrim2=0.0;
-  if(myPrim2) massPrim2 = myPrim2->GetMass();
-
-  //KRANE(A.5) T = E - mc2;
-  G4double energyPrim1 = sqrt(momentumPrim1.mag2()+massPrim1*massPrim1) - massPrim1;
-  G4double energyPrim2 = sqrt(momentumPrim2.mag2()+massPrim2*massPrim2) - massPrim2;
-
-  if(storeHistogramsFlag=="on"){ // added flag dypang 080301
-
-  //Primary histograms
-  if (hPrimTheta)
-    hPrimTheta->Fill(momentumPrim1.theta());
-  if (hPrimPhi)
-    hPrimPhi->Fill(momentumPrim1.phi());
-  if (hPrimEnergy)
-    hPrimEnergy->Fill(energyPrim1);
-  if (hPrimEnergyVsTheta)
-    hPrimEnergyVsTheta->Fill(momentumPrim1.theta(),energyPrim1);
-  }
-
-  if(storeEventsFlag=="on"){  // added flag dypang 080301
-    theData->SetThetaPrim1(momentumPrim1.theta());
-    theData->SetThetaPrim2(momentumPrim2.theta());
-    theData->SetPhiPrim1(momentumPrim1.phi());
-    theData->SetPhiPrim2(momentumPrim2.phi());
-    theData->SetEnergyPrim1(energyPrim1);
-    theData->SetEnergyPrim2(energyPrim2);
-  }
-
-  //calling the actions defined for each detector
-  if(gasAnal) gasAnal->EndOfEventAction(anEvent);
-  if(silAnal) silAnal->EndOfEventAction(anEvent);
-  if(sciAnal) sciAnal->EndOfEventAction(anEvent);
-
-  OnceAWhileDoIt();
-
-}
-*/
 
 
 void ActarSimROOTAnalysis::ClassifyNewTrack(const G4Track *aTrack,

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol hapol@fpddux.usc.es
+//*-- AUTHOR : Hector Alvarez-Pol
 //*-- Date: 11/2004
-//*-- Last Update: 05/05/08
+//*-- Last Update: 26/11/15
 // --------------------------------------------------------------
 // Description:
 //   Detector construction and complementary definitions
@@ -9,7 +9,8 @@
 // --------------------------------------------------------------
 // Comments:
 //
-//   - 17/04/08 Modularizing the detectors construction 
+//   - 26/11/15 Recovering old functionality and correcting
+//   - 17/04/08 Modularizing the detectors construction
 //   - 04/04/06 Multigeometry with the possibility of updating.
 //              Gas as a sensitive detector...
 //   - 24/05/05 Created based on calGamma simulation
@@ -25,7 +26,6 @@
 #include "ActarSimUniformEMField.hh"
 #include "globals.hh"
 
-class G4Sphere;
 class G4Box;
 class G4Tubs;
 class G4LogicalVolume;
@@ -49,37 +49,36 @@ class ActarSimSciDetectorConstruction;
 class ActarSimSciRingDetectorConstruction;
 class ActarSimPlaDetectorConstruction;
 
-class ActarSimDetectorConstruction : public G4VUserDetectorConstruction {  
+class ActarSimDetectorConstruction : public G4VUserDetectorConstruction {
 private:
 
   ActarSimGasSD* gasSD;
   ActarSimSilSD* silSD;
-  ActarSimSilRingSD* silRingSD;	
+  ActarSimSilRingSD* silRingSD;
   ActarSimSciSD* sciSD;
   ActarSimSciRingSD* sciRingSD;
-  ActarSimPlaSD* plaSD;	
+  ActarSimPlaSD* plaSD;
 
   // Volumes
   G4Box* solidWorld;
-  //G4Sphere* solidWorld;
 
   // Logical volumes
   G4LogicalVolume* worldLog;      //pointer to logic world
-  G4LogicalVolume* chamberLog;      //pointer to logic world
+  G4LogicalVolume* chamberLog;    //pointer to logic chamber
   G4LogicalVolume* AlplateLog;    //pointer to logic aluminium plate
   G4LogicalVolume* DiamondLog;    //pointer to logic Diamond detector
   G4LogicalVolume* SupportLog;    //pointer to logic CageField support
 
   // Physical volumes
   G4VPhysicalVolume* worldPhys;   //pointer to physical world
-  G4VPhysicalVolume* chamberPhys;   //pointer to physical world
+  G4VPhysicalVolume* chamberPhys; //pointer to physical chamber
   G4VPhysicalVolume* AlplatePhys; //pointer to physical Al plate
   G4VPhysicalVolume* DiamondPhys; //pointer to physical Diamond detector
   G4VPhysicalVolume* SupportPhys; //pointer to physical CageField support
 
   //Assembly of slits
-  G4AssemblyVolume* SlitMask;
-  
+  //G4AssemblyVolume* SlitMask;  //NOT USED IN THIS FILE
+
   // Materials
   G4Material* mediumMaterial;
   G4Material* defaultMaterial;
@@ -92,43 +91,86 @@ private:
   G4ThreeVector eField;
   G4ThreeVector mField;
 
-  //Chamber X,Y,Z length
+  //World X,Y,Z half-lengths (always centered at (0,0,0))
+  G4double worldSizeX;
+  G4double worldSizeY;
+  G4double worldSizeZ;
+
+  //Chamber X,Y,Z half-lengths
   G4double chamberSizeX;
   G4double chamberSizeY;
   G4double chamberSizeZ;
 
-  //Pad height
-  G4double yPadSize;
-
-  //GasBox dimensions
-  G4double yGasBoxPosition;
-  G4double zGasBoxPosition;
+  //Chamber X,Y,Z Center
+  G4double chamberCenterX;
+  G4double chamberCenterY;
+  G4double chamberCenterZ;
 
   //Control of the geometry of the experiment
   G4String MaikoGeoIncludedFlag;
-  G4String CosmicIncludedFlag;
+  G4String ACTARTPCDEMOGeoIncludedFlag;
+  G4String ACTARTPCGeoIncludedFlag;
   G4String gasGeoIncludedFlag;
   G4String silGeoIncludedFlag;
   G4String sciGeoIncludedFlag;
+  G4String SpecMATGeoIncludedFlag;
+  G4String OthersGeoIncludedFlag;
 
   //Detectors
-  ActarSimGasDetectorConstruction* gasDet;  //target
-  ActarSimSilDetectorConstruction* silDet;     //recoil si
-  ActarSimSilRingDetectorConstruction* silRingDet;
-  ActarSimSciDetectorConstruction* sciDet;     //calorimeter
-  ActarSimSciRingDetectorConstruction* sciRingDet;
-  ActarSimPlaDetectorConstruction* plaDet;     //Hodoscope
+  ActarSimGasDetectorConstruction* gasDet;          //target
+  ActarSimSilDetectorConstruction* silDet;          //recoil si
+  ActarSimSilRingDetectorConstruction* silRingDet;  //silRing for MAIKO
+  ActarSimSciDetectorConstruction* sciDet;          //calorimeter
+  ActarSimSciRingDetectorConstruction* sciRingDet;  //sciRing for MAIKO
+  ActarSimPlaDetectorConstruction* plaDet;          //Hodoscope
 
   ActarSimDetectorMessenger* detectorMessenger;  //pointer to the Messenger
 
   void DefineMaterials();
-  G4VPhysicalVolume* ConstructActar();
+  G4VPhysicalVolume* ConstructEmptyWorld();  
+  G4VPhysicalVolume* ConstructActarTPC();
+  G4VPhysicalVolume* ConstructActarTPCDEMO();
+  G4VPhysicalVolume* ConstructSpecMAT();
+  G4VPhysicalVolume* ConstructMAIKO();
+  G4VPhysicalVolume* ConstructOthers();
 
 public:
-  
+
   ActarSimDetectorConstruction();
   ~ActarSimDetectorConstruction();
+
+  G4VPhysicalVolume* Construct();
+
+  void SetWorldSizeX(G4double val){worldSizeX = val;}
+  void SetWorldSizeY(G4double val){worldSizeY = val;}
+  void SetWorldSizeZ(G4double val){worldSizeZ = val;}
+
+  void SetChamberSizeX(G4double val){chamberSizeX = val;}
+  void SetChamberSizeY(G4double val){chamberSizeY = val;}
+  void SetChamberSizeZ(G4double val){chamberSizeZ = val;}
+
+  void SetChamberCenterX(G4double val){chamberCenterX = val;}
+  void SetChamberCenterY(G4double val){chamberCenterY = val;}
+  void SetChamberCenterZ(G4double val){chamberCenterZ = val;}
+
+
+  void SetMediumMaterial(G4String);
+  void SetDefaultMaterial(G4String);
+  void SetChamberMaterial(G4String);
+  void SetWindowMaterial (G4String);
+  void SetUpdateChamberMaterial(G4Material*);
+
+  void SetMaikoGeoIncludedFlag(G4String val){MaikoGeoIncludedFlag=val;}
+  void SetACTARTPCDEMOGeoIncludedFlag(G4String val){ACTARTPCDEMOGeoIncludedFlag=val;}
+  void SetACTARTPCGeoIncludedFlag(G4String val){ACTARTPCGeoIncludedFlag=val;}
+  void SetSpecMATGeoIncludedFlag(G4String val){SpecMATGeoIncludedFlag=val;}
+  void SetOthersGeoIncludedFlag(G4String val){OthersGeoIncludedFlag=val;}
+
   
+  void SetGasGeoIncludedFlag(G4String val){gasGeoIncludedFlag=val;}
+  void SetSilGeoIncludedFlag(G4String val){silGeoIncludedFlag=val;}
+  void SetSciGeoIncludedFlag(G4String val){sciGeoIncludedFlag=val;}
+
   ActarSimGasSD* GetGasSD(void){return gasSD;}
   ActarSimSilSD* GetSilSD(void){return silSD;}
   ActarSimSilRingSD* GetSilRingSD(void){return silRingSD;}
@@ -136,47 +178,28 @@ public:
   ActarSimSciRingSD* GetSciRingSD(void){return sciRingSD;}
   ActarSimPlaSD* GetPlaSD(void){return plaSD;}
 
-  G4VPhysicalVolume* Construct();
-  
-  void SetXGasChamber(G4double val){chamberSizeX = val;} 
-  void SetYGasChamber(G4double val){chamberSizeY = val;} 
-  void SetZGasChamber(G4double val){chamberSizeZ = val;} 
-  void SetMediumMaterial(G4String);
-  void SetDefaultMaterial(G4String);
-  void SetChamberMaterial(G4String);
-  void SetUpdateChamberMaterial(G4Material*);
-  void SetWindowMaterial (G4String);
+  ActarSimDetectorMessenger* GetDetectorMessenger(){return detectorMessenger;};
 
-  void SetYPadSize(G4double val){yPadSize = val;} 
+  G4LogicalVolume* GetWorldLogicalVolume(){return worldLog;}
+  G4VPhysicalVolume* GetWorldPhysicalVolume(){return worldPhys;}
+  G4LogicalVolume* GetChamberLogicalVolume(){return chamberLog;}
+  G4VPhysicalVolume* GetChamberPhysicalVolume(){return chamberPhys;}
 
-  void SetYGasBoxPosition(G4double val){yGasBoxPosition = val;} 
-  void SetZGasBoxPosition(G4double val){zGasBoxPosition = val;} 
+  G4double GetWorldSizeX(void){return worldSizeX;}
+  G4double GetWorldSizeY(void){return worldSizeY;}
+  G4double GetWorldSizeZ(void){return worldSizeZ;}
 
-  void UpdateGeometry();
-  void UpdateEMField();
+  G4double GetChamberSizeX(void){return chamberSizeX;}
+  G4double GetChamberSizeY(void){return chamberSizeY;}
+  G4double GetChamberSizeZ(void){return chamberSizeZ;}
+
+  G4double GetChamberCenterX(void){return chamberCenterX;}
+  G4double GetChamberCenterY(void){return chamberCenterY;}
+  G4double GetChamberCenterZ(void){return chamberCenterZ;}
 
   G4Material* GetMediumMaterial() {return mediumMaterial;};
   G4Material* GetDefaultMaterial() {return defaultMaterial;};
   G4Material* GetChamberMaterial() {return chamberMaterial;};
- 
-  //const G4VPhysicalVolume* GetWorldPhys()   {return worldPhys;};
-  //const G4VPhysicalVolume* GetGasPhys() {return gasPhys;};
-  //const G4LogicalVolume* GetWorldLog()     {return worldLog;};
-
-  G4LogicalVolume* GetWorldLogicalVolume(){return worldLog;}
-  G4VPhysicalVolume* GetWorldPhysicalVolume(){return worldPhys;}
-  //G4Material* GetWorldMaterial() {return worldMaterial;}
-  G4LogicalVolume* GetChamberLogicalVolume(){return chamberLog;}
-  G4VPhysicalVolume* GetChamberPhysicalVolume(){return chamberPhys;}
-
-  G4double GetChamberXLength(void){return chamberSizeX;} 
-  G4double GetChamberYLength(void){return chamberSizeY;} 
-  G4double GetChamberZLength(void){return chamberSizeZ;} 
-
-  G4double GetYPadSize(void){return yPadSize;} 
-
-  G4double GetYGasBoxPosition(void){return yGasBoxPosition;} 
-  G4double GetZGasBoxPosition(void){return zGasBoxPosition;} 
 
   ActarSimGasDetectorConstruction* GetGasDetector() {return gasDet;}
   ActarSimSilDetectorConstruction* GetSilDetector() {return silDet;}
@@ -185,10 +208,15 @@ public:
   ActarSimSciRingDetectorConstruction* GetSciRingDetector() {return sciRingDet;}
   ActarSimPlaDetectorConstruction* GetPlaDetector() {return plaDet;}
 
-  void SetMaikoGeoIncludedFlag(G4String val){MaikoGeoIncludedFlag=val;}
-  void SetGasGeoIncludedFlag(G4String val){gasGeoIncludedFlag=val;}
-  void SetSilGeoIncludedFlag(G4String val){silGeoIncludedFlag=val;}
-  void SetSciGeoIncludedFlag(G4String val){sciGeoIncludedFlag=val;}
+  G4String GetMaikoGeoIncludedFlag(void){return MaikoGeoIncludedFlag;}
+  G4String GetACTARTPCDEMOGeoIncludedFlag(void){return ACTARTPCDEMOGeoIncludedFlag;}
+  G4String GetACTARTPCGeoIncludedFlag(void){return ACTARTPCGeoIncludedFlag;}
+  G4String GetSpecMATGeoIncludedFlag(void){return SpecMATGeoIncludedFlag;}
+  G4String GetOthersGeoIncludedFlag(void){return OthersGeoIncludedFlag;}
+
+
+  void UpdateGeometry();
+  void UpdateEMField();
 
   void SetEleField(G4ThreeVector eVector);
   void SetMagField(G4ThreeVector mVector);
@@ -197,4 +225,3 @@ public:
 };
 
 #endif
-

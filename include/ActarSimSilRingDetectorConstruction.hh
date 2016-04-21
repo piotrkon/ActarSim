@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez    hapolyo@usc.es
+//*-- AUTHOR : Hector Alvarez
 //*-- Date: 04/2008
-//*-- Last Update: 17/05/08 by Hector Alvarez
+//*-- Last Update: 07/01/15 by Hector Alvarez
 // --------------------------------------------------------------
 // Description:
 //   Silicon detector description
@@ -26,20 +26,20 @@ class G4Material;
 class ActarSimSilRingDetectorMessenger;
 class ActarSimDetectorConstruction;
 
-class ActarSimSilRingDetectorConstruction {  
+class ActarSimSilRingDetectorConstruction {
 private:
 
   // Materials
   G4Material* silBulkMaterial;
 
-  ActarSimSilRingDetectorMessenger* silMessenger;   //pointer to the Messenger
+  //ActarSimSilRingDetectorMessenger* silMessenger;   //pointer to the Messenger NOT USED
   ActarSimDetectorConstruction* detConstruction;//pointer to the global detector
 
   G4VPhysicalVolume* ConstructSil(G4LogicalVolume*);
 
   G4int sideCoverage;   // 6 bits to indicate which sil wall is present (1) or absent (0)
 			// order is:
-			// bit1 (lsb) beam output wall 
+			// bit1 (lsb) beam output wall
 			// bit2 lower (gravity based) wall
 			// bit3 upper (gravity based) wall
 			// bit4 left (from beam point of view) wall
@@ -77,4 +77,3 @@ public:
 
 };
 #endif
-

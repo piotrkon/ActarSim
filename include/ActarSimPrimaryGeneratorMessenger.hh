@@ -1,8 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol  (hapol@fpddux.usc.es)
+//*-- AUTHOR : Hector Alvarez-Pol
 //*-- Date: 11/2004
-//*-- Last Update: 03/04/06
-//*-- Modified by B. Fernandez-Dominguez bfd@ns.ph.liv.ac.uk
+//*-- Last Update: 16/12/14 by Hector Alvarez Pol
 // --------------------------------------------------------------
 // Description:
 //   Messenger for the primary generator.
@@ -37,11 +36,11 @@ private:
   ActarSimPrimaryGeneratorAction* actarSimActionGun;
   G4ParticleTable* particleTable;
 
-    G4UIdirectory*               CRYDir;
-    G4UIcmdWithAString*          FileCmd; 
-    G4UIcmdWithAString*          InputCmd;
-    G4UIcmdWithoutParameter*     UpdateCmd;
-    std::string* MessInput;
+  G4UIdirectory*               CRYDir;
+  G4UIcmdWithAString*          FileCmd; 
+  G4UIcmdWithAString*          InputCmd;
+  G4UIcmdWithoutParameter*     UpdateCmd;
+  std::string* MessInput;
 
   G4UIdirectory*               gunDir;
   G4UIdirectory*               CineDir;
@@ -63,9 +62,9 @@ private:
   G4UIcommand*                 CinerandomThetaValCmd;
   G4UIcmdWithADoubleAndUnit*   energyCmd;
   G4UIcmdWith3Vector*          directionCmd;
+  G4UIcmdWithADoubleAndUnit*   beamThetaCmd;
+  G4UIcmdWithADoubleAndUnit*   beamPhiCmd;
   G4UIcmdWith3VectorAndUnit*   positionCmd;
-  G4UIcmdWithADoubleAndUnit*   EntranceYPositionCmd;
-  G4UIcmdWithADoubleAndUnit*   EntranceZPositionCmd;
   G4UIcmdWithADoubleAndUnit*   timeCmd;
   G4UIcmdWithAString*          randomVertexZPositionCmd;
   G4UIcommand*                 randomVertexZPositionRangeCmd;
@@ -74,9 +73,10 @@ private:
   G4UIcmdWithAnInteger*        numberCmd;
 
   G4UIcmdWithADouble*          emittanceCmd;             // emittance (in mm mrad)
+  G4UIcmdWith3Vector*          beamDirectionCmd;
+  G4UIcmdWith3VectorAndUnit*   beamPositionCmd;
   G4UIcmdWithADoubleAndUnit*   beamRadiusAtEntranceCmd;  // emittance (in position at detector entrance)
 
-// for Kine, dypang 080228
   G4UIcmdWithAString*          reactionFromKineCmd;
   G4UIdirectory*               KineDir;
   G4UIcmdWithAString*          KineRandomThetaCmd;
@@ -90,10 +90,6 @@ private:
   G4UIcmdWithADoubleAndUnit*   KineUserThetaCMCmd;
   G4UIcmdWithADoubleAndUnit*   KineUserPhiAngleCmd;
   G4UIcmdWith3VectorAndUnit*   vertexPositionCmd;
-// end of Kine part, dypang 080228
-
-// for CRY
-  G4UIcmdWithAString*          reactionFromCRYCmd;
 
   G4UIcommand* incidentIonCmd;
   G4UIcommand* targetIonCmd;
@@ -104,8 +100,10 @@ private:
   G4UIcmdWithADoubleAndUnit* labEnergyCmd;
   G4UIcmdWithADoubleAndUnit* thetaLabAngleCmd;
 
-
   G4UIcommand*                 ionCmd;
+
+  // for CRY
+  G4UIcmdWithAString*          reactionFromCRYCmd;
 
   // for ion shooting
   G4bool   fShootIon;
@@ -138,4 +136,3 @@ public:
 };
 
 #endif
-

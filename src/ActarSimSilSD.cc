@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol    hapolyo@usc.es
+//*-- AUTHOR : Hector Alvarez Pol
 //*-- Date: 04/2008
-//*-- Last Update:
+//*-- Last Update: 07/01/15
 // --------------------------------------------------------------
 // Description:
 //   SD for the Silicons
@@ -65,8 +65,8 @@ G4bool ActarSimSilSD::ProcessHits(G4Step* aStep,G4TouchableHistory*){
   // Filling the ActarSimSilGeantHit information with the step info
   // Invoked by G4SteppingManager for each step
   //
-  G4double edep = aStep->GetTotalEnergyDeposit();
-  //G4double edep = -aStep->GetDeltaEnergy()/MeV;
+  //G4double edep = aStep->GetTotalEnergyDeposit();
+  G4double edep = -aStep->GetDeltaEnergy()/MeV;
 
   if(edep==0.) return false;
 

@@ -1,18 +1,17 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol  hapolyo@usc.es
+//*-- AUTHOR : Hector Alvarez-Pol
 //*-- Date: 11/2004
-//*-- Last Update: 17/06/08
-//*-- Modified by H. Alvarez Pol hapolyo@usc.es
+//*-- Last Update: 04/12/15 by Hector Alvarez Pol
 // --------------------------------------------------------------
 // Description:
 //   Actions to perform to generate a primary vertex
 //
 // --------------------------------------------------------------
 // Comments:
+//   - 04/12/15 Complete cleanup and recovering of functions
 //   - 25/11/04 Created based on example/novice/N01 structure
 //
 // --------------------------------------------------------------
-//
 /////////////////////////////////////////////////////////////////
 
 #ifndef ActarSimPrimaryGeneratorAction_h
@@ -35,11 +34,6 @@
 #include "../cosmic/src/CRYParticle.h"
 #include "../cosmic/src/CRYUtils.h"
 #include "RNGWrapper.hh"
-// #include "/home/piotr/GEANT4/g4work/ActarSim/ActarSim_G4.9.6.p03/ActarSim_cosmic/cosmic/src/CRYSetup.h"
-// #include "/home/piotr/GEANT4/g4work/ActarSim/ActarSim_G4.9.6.p03/ActarSim_cosmic/cosmic/src/CRYGenerator.h"
-// #include "/home/piotr/GEANT4/g4work/ActarSim/ActarSim_G4.9.6.p03/ActarSim_cosmic/cosmic/src/CRYParticle.h"
-// #include "/home/piotr/GEANT4/g4work/ActarSim/ActarSim_G4.9.6.p03/ActarSim_cosmic/cosmic/src/CRYUtils.h"
-//#include "/home/piotr/GEANT4/g4work/ActarSim/ActarSim_G4.9.6.p03/ActarSim_cosmic/cosmic/geant/include/RNGWrapper.hh"
 
 #include "ActarSimEventGenerator.hh"
 
@@ -58,7 +52,7 @@ private:
   G4ParticleGun* particleGun;
   G4ParticleTable* particleTable;
   ActarSimPrimaryGeneratorMessenger* gunMessenger; // pointer to messenger
-  ActarSimEventGenerator *pReadEvGen;
+  //ActarSimEventGenerator *pReadEvGen;
 
   ActarSimGasDetectorConstruction* gasDetector;  //to get some geometrical info
 
@@ -70,59 +64,47 @@ private:
   G4double targetIonCharge;
   G4double scatteredIonCharge;
   G4double recoilIonCharge;
-  //G4double incidentIonExcEnergy;    //not included in G4ParticleDefinition
-  //G4double targetIonExcEnergy;      //not included in G4ParticleDefinition
-  //G4double scatteredIonExcEnergy;   //not included in G4ParticleDefinition
-  //G4double recoilIonExcEnergy;      //not included in G4ParticleDefinition
   G4double reactionQ;
   G4double labEnergy;
   G4double incidentEnergy;
   G4double thetaLabAngle;
+
   G4String randomVertexZPositionFlag;
   G4double randomVertexZPositionMin;
   G4double randomVertexZPositionMax;
-  G4double vertexZPosition; // vertex Z position, dypang 080704
+  G4double vertexZPosition;
 
-  G4ThreeVector ParticlePosition;
-  G4ParticleMomentum ParticleDirection;
-
-  //beam emittance
+  //beam parameters
   G4double emittance;
   G4double beamRadiusAtEntrance;
-  
-  G4double entranceY;
-  G4double entranceZ;
-
-  //
-  G4double theta1;
-  G4double theta2;
-  G4double energy1;
-  G4double energy2;
-  //
+  G4ThreeVector beamPosition;
+  G4ParticleMomentum beamMomentumDirection;
+  G4bool  beamDirectionFlag;      // flag for a beam direction defined by angles (0) or vector (1)
 
   G4double lengthParameter;       //parameter coming from the geometry selection
-  G4double  randomThetaMin;      // min random theta angle in CINE
-  G4double  randomThetaMax;      // max  for a random theta angle in CINE
+  G4double  randomThetaMin;       // min random theta angle in CINE
+  G4double  randomThetaMax;       // max  for a random theta angle in CINE
 
-  G4double  randomPhiMin;      // min random theta angle in CINE
-  G4double  randomPhiMax;      // max  for a random theta angle in CINE
+  G4double  randomPhiMin;         // min random theta angle in CINE
+  G4double  randomPhiMax;         // max  for a random theta angle in CINE
 
-  G4String  beamInteractionFlag;    // flag for beam interaction mode
+  G4String  beamInteractionFlag;  // flag for beam interaction mode
   G4String  realisticBeamFlag;    // flag for realistic beam interaction
   G4String  reactionFromEvGenFlag; // flag for a reaction taken from the tabulated Ev Generator
   G4String  reactionFromCrossSectionFlag; // flag for a reaction taken from the Ev Generator+CINE
   G4String  reactionFromFileFlag; // flag for a reaction taken from a file
   G4String  reactionFromCineFlag; // flag for a reaction calculated using Cine
   G4String  randomThetaFlag;      // flag for a random theta angle in CINE
-  G4String  randomPhiFlag;      // flag for a random theta angle in CINE
-  G4String  alphaSourceFlag;      // flag for a random theta angle in CINE
+  G4String  randomPhiFlag;        // flag for a random phi angle in CINE
+  G4String  alphaSourceFlag;      //
   G4String  reactionFile;         // file definition for a reaction
 
   G4String  reactionFromCRYFlag;
 
-// data member for Kine, dypang 080228
+  // Kine data members
   G4String  reactionFromKineFlag;
   G4double  thetaCMAngle;
+  G4double  userThetaAngle;
   G4double  userPhiAngle;
   G4double  massOfProjectile;
   G4double  massOfTarget;
@@ -134,16 +116,15 @@ private:
   G4double  exEnergyOfRecoiled;
   G4ThreeVector vertexPosition;
   G4String  randomPhiAngleFlag;
-// end of data member for Kine, dypang 080228
 
 
 public:
   ActarSimPrimaryGeneratorAction(const char * filename);
   ~ActarSimPrimaryGeneratorAction();
 
-    void InputCRY();
-    void UpdateCRY(std::string* MessInput);
-    void CRYFromFile(G4String newValue);
+  void InputCRY();
+  void UpdateCRY(std::string* MessInput);
+  void CRYFromFile(G4String newValue);
 
   void GeneratePrimaries(G4Event* anEvent);
 
@@ -178,9 +159,11 @@ public:
   void SetReactionFromCRYFlag(G4String val) { reactionFromCRYFlag = val;}
 
   void SetReactionFromKineFlag(G4String val) { reactionFromKineFlag = val;}
-  void SetThetaCMAngle(G4double val){thetaCMAngle=val;}
-  void SetUserPhiAngle(G4double val){userPhiAngle=val;}
+  void SetThetaCMAngle(G4double val){thetaCMAngle=val; beamDirectionFlag=0;}
+  void SetUserThetaAngle(G4double val){userThetaAngle=val; beamDirectionFlag=0;}
+  void SetUserPhiAngle(G4double val){userPhiAngle=val; beamDirectionFlag=0;}
   G4double GetThetaCMAngle(){return thetaCMAngle;}
+  G4double GetUserThetaAngle(){return userThetaAngle;}
   G4double GetUserPhiAngle(){return userPhiAngle;}
 
   void SetMassOfProjectile(G4double val){massOfProjectile=val;}
@@ -221,9 +204,6 @@ public:
   void SetIncidentEnergy(G4double val) {
        incidentEnergy = val;
        }
-
-  void SetEntranceYPosition(G4double val){ entranceY = val;}
-  void SetEntranceZPosition(G4double val){ entranceZ = val;}
 
   void SetThetaLabAngle(G4double val) { thetaLabAngle = val;}
   void SetVertexZPosition(G4double val) { vertexZPosition = val;} // vertex Z position, dypang 080704
@@ -268,19 +248,24 @@ public:
   inline void SetParticleMomentum(G4ParticleMomentum aMomentum)
      { particleGun->SetParticleMomentum(aMomentum);}
   inline void SetParticleMomentumDirection(G4ParticleMomentum aMomentumDirection)
-     { particleGun->SetParticleMomentumDirection(aMomentumDirection); ParticleDirection=aMomentumDirection;}
+     { particleGun->SetParticleMomentumDirection(aMomentumDirection); }
   inline void SetParticleEnergy(G4double aKineticEnergy)
-     { particleGun->SetParticleEnergy(aKineticEnergy); }
+     { particleGun->SetParticleEnergy(aKineticEnergy); incidentEnergy = aKineticEnergy;}
   inline void SetParticleCharge(G4double aCharge)
      { particleGun->SetParticleCharge(aCharge); }
   inline void SetParticlePolarization(G4ThreeVector aVal)
      { particleGun->SetParticlePolarization(aVal); }
   inline void SetParticlePosition(G4ThreeVector aPos)
-  { particleGun->SetParticlePosition(aPos); ParticlePosition=aPos;}
+     { particleGun->SetParticlePosition(aPos); }
   inline void SetParticleTime(G4double aTime)
      { particleGun->SetParticleTime(aTime); }
   inline void SetNumberOfParticles(G4int i)
      { particleGun->SetNumberOfParticles(i); }
+
+   void SetBeamMomentumDirection(G4ParticleMomentum aMomentumDirection)
+     { beamMomentumDirection=aMomentumDirection; beamDirectionFlag=1;}
+   void SetBeamPosition(G4ThreeVector aPos)
+     { beamPosition=aPos;}
 
   inline G4ParticleDefinition* GetParticleDefinition()
      { return particleGun->GetParticleDefinition(); }
@@ -320,9 +305,6 @@ public:
   G4double GetThetaLabAngle(){return thetaLabAngle;}
   G4double GetVertexZPosition(){return vertexZPosition;} // vertex Z position, dypang 080704
 
-
 };
 
 #endif
-
-

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol hapol@fpddux.usc.es
+//*-- AUTHOR : Hector Alvarez-Pol
 //*-- Date: 11/2004
-//*-- Last Update: 28/10/05
+//*-- Last Update: 23/12/14
 // --------------------------------------------------------------
 // Description:
 //   Controls the actions to perform during the steps. Note
@@ -32,8 +32,8 @@ class ActarSimSteppingAction : public G4UserSteppingAction
     void UserSteppingAction(const G4Step*);
 
   private:
-    ActarSimDetectorConstruction* detector;
-    ActarSimEventAction*          eventaction;
+    ActarSimDetectorConstruction* detector; //NOT USED
+    ActarSimEventAction*          eventaction; //NOT USED
 };
 
 #endif

@@ -45,6 +45,8 @@
 #/ActarSim/phys/addPhysics emstandard_opt4
 /ActarSim/phys/addPhysics ionGasModels
 #
+#
+#
 # Cuts for the particles  (incomplete list, see README)
 #
 #  /ActarSim/phys/setGCut 0.1
@@ -52,6 +54,7 @@
 #  /ActarSim/phys/setPCut 0.1
 #  /ActarSim/phys/setCuts 1 mm
 /ActarSim/phys/verbose 0
+#
 #
 # Initialization is moved here from the main allowing PhysicsList
 #
@@ -61,6 +64,9 @@
 #
 # GENERAL COMMANDS
 #
+# SET THE MAIN GEOMTERY FLAG
+/ActarSim/det/ACTARTPCDEMOGeoIncludedFlag on
+#
 # Control of the material outside the chamber (by default Air)
 #/ActarSim/det/setMediumMat D2_STP
 #/ActarSim/det/setMediumMat Galactic
@@ -69,20 +75,33 @@
 #/ActarSim/det/setEleField 0 5e-3 0
 #/ActarSim/det/setMagField 0 0 0 T
 #
-# GAS material: isoC4H10STP, D2_STP, H2_STP
+# gas material: H2, D2, He, Ar, CF4, iC4H10
 #
-/ActarSim/det/gas/setGasMat D2_STP
+#/ActarSim/det/gas/setGasPressure 1.01325
+#/ActarSim/det/gas/setGasTemperature 293.15
+#/ActarSim/det/gas/setGasMat iC4H10
 #
-/ActarSim/det/MaikoGeoIncludedFlag off
+# Make a gas mixture : first select number of elements (up to 10)
+# And then set all gases with their ratio 
+/ActarSim/det/gas/mixture/GasMixture 2
+/ActarSim/det/gas/mixture/setGasMix 1 He 0.90
+/ActarSim/det/gas/mixture/setGasMix 2 iC4H10 0.10
+/ActarSim/det/gas/setGasMat GasMix
+#
+#
+# GAS CHAMBER
+#
+/ActarSim/det/setXLengthGasChamber 95. mm
+/ActarSim/det/setYLengthGasChamber 105. mm
+/ActarSim/det/setZLengthGasChamber 120. mm
 #
 # GAS DETECTOR
 #
 /ActarSim/det/gasGeoIncludedFlag on
 # if box
 /ActarSim/det/gas/setDetectorGeometry box
-/ActarSim/det/gas/luciteBoxIncluded off
 /ActarSim/det/gas/setXLengthGasBox 37. mm
-/ActarSim/det/gas/setYLengthGasBox 80.9 mm
+/ActarSim/det/gas/setYLengthGasBox 85. mm
 /ActarSim/det/gas/setZLengthGasBox 69. mm
 #
 # Beam shield? tube or off
@@ -102,24 +121,26 @@
 # bit6 (msb) beam entrance wall               32
 # examples: 63 full coverage; 3 only output and bottom walls ...
 /ActarSim/det/sil/sideCoverage 25
-#/ActarSim/det/sil/xBoxHalfLength 150. mm
-#/ActarSim/det/sil/yBoxHalfLength 150. mm
-#/ActarSim/det/sil/zBoxHalfLength 150. mm
 #
-/ActarSim/det/sil/xBoxHalfLength 95. mm
-/ActarSim/det/sil/yBoxHalfLength 105. mm
-/ActarSim/det/sil/zBoxHalfLength 120. mm
+#/ActarSim/det/sil/xBoxHalfLength 95. mm
+#/ActarSim/det/sil/yBoxHalfLength 105. mm
+#/ActarSim/det/sil/zBoxHalfLength 120. mm
+#
+/ActarSim/det/sil/xBoxHalfLength 53.8 mm
+/ActarSim/det/sil/yBoxHalfLength 0. mm
+/ActarSim/det/sil/zBoxHalfLength 46.8 mm
+#
 /ActarSim/det/sil/print
 #
 # SCINTILLATOR DETECTOR
 #
 /ActarSim/det/sciGeoIncludedFlag off
 # see above explanation in the equivalent command for the Silicons
-/ActarSim/det/sci/sideCoverage 25
-/ActarSim/det/sci/xBoxHalfLength 150. mm
-/ActarSim/det/sci/yBoxHalfLength 150. mm
-/ActarSim/det/sci/zBoxHalfLength 150. mm
-/ActarSim/det/sci/print
+#/ActarSim/det/sci/sideCoverage 25
+#/ActarSim/det/sci/xBoxHalfLength 150. mm
+#/ActarSim/det/sci/yBoxHalfLength 150. mm
+#/ActarSim/det/sci/zBoxHalfLength 150. mm
+#/ActarSim/det/sci/print
 #
 #Control of the output on the ROOT file
 #all the tracks are stored (note: huge space comsumption)
@@ -127,7 +148,7 @@
 /ActarSim/analControl/storeTracks off
 /ActarSim/analControl/storeTrackHistos on
 /ActarSim/analControl/storeEvents off
-/ActarSim/analControl/storeHistograms off
+/ActarSim/analControl/storeHistograms on
 /ActarSim/analControl/storeSimpleTracks on
 #/ActarSim/analControl/setMinStrideLength 0.1
 #/ActarSim/phys/stepMax 1000000.
@@ -137,12 +158,15 @@
 /ActarSim/det/update
 #/ActarSim/det/print
 #
+#
 # Control of the primary events
 #For all cases the possibility to have realistic beam distribution
-/ActarSim/gun/beamInteraction off
+/ActarSim/gun/beamInteraction on
 /ActarSim/gun/realisticBeam off
 #/ActarSim/gun/beamRadiusAtEntrance 1.5 mm
 #/ActarSim/gun/emittance 200.0
+/ActarSim/gun/beamDirection 0 0 1
+/ActarSim/gun/beamPosition 0 100 -19 mm 
 #
 # Realistic Event-Generator on
 /ActarSim/gun/reactionFromEvGen off
@@ -152,31 +176,6 @@
 /ActarSim/gun/reactionFromCrossSection off
 #
 # A) Track a particle or set of particles defined from the Particles list
-#
-#/ActarSim/gun/List
-#/ActarSim/gun/particle proton
-#if you want to use an ion, write "ion" in the previous command
-#and set the Z, A and charge state in the next...
-
-#/ActarSim/gun/ion 1 1 1 0.0 1.00782503207
-#/ActarSim/gun/ion 2 4 2 0.0 4.00260325415
-/ActarSim/gun/ion 6 12 6 0.0 12.
-#/ActarSim/gun/ion 6 13 6 0.0 13.00335483778 
-#/ActarSim/gun/ion 12 24 12 0.0 23.985041699
-#/ActarSim/gun/ion 26 56 26 0.0 55.934937475
-
-#/ActarSim/gun/Kine/labEnergy 15 MeV
-#/ActarSim/gun/Kine/labEnergy 80 MeV
-#/ActarSim/gun/Kine/labEnergy 40 MeV
-#/ActarSim/gun/energy 11. MeV
-#/ActarSim/gun/position 0 0 -56 mm
-#/ActarSim/gun/direction 0 0 1
-#/ActarSim/gun/time 0
-#/ActarSim/gun/polarization 0
-#/ActarSim/gun/number 1
-#/ActarSim/gun/randomVertexZPosition off
-#/ActarSim/gun/randomVertexZRange 50 200 mm
-#/ActarSim/gun/vertexZPosition 150 mm
 #
 # B) Track a predefined reaction from a file:
 #
@@ -188,7 +187,48 @@
 #
 #D) Track a reacion calculated from KINE
 #
-/ActarSim/gun/reactionFromKine off
+/ActarSim/gun/reactionFromKine on
+#
+#/ActarSim/gun/Kine/incidentIon 1 2 1 0.0 2.0141
+#/ActarSim/gun/Kine/incidentIon 2 4 2 0.0 4.001506179125
+#/ActarSim/gun/Kine/incidentIon 2 4 2 0.0 4.00260325
+/ActarSim/gun/Kine/incidentIon 6 12 6 0.0 12.
+#/ActarSim/gun/Kine/incidentIon 6 13 6 0.0 13.00335483778
+#/ActarSim/gun/Kine/incidentIon 50 132 50 0.0 131.9178
+
+#/ActarSim/gun/Kine/targetIon 1 1 1 0.0 1.00782503207
+#/ActarSim/gun/Kine/targetIon 1 2 1 0.0 2.0141
+/ActarSim/gun/Kine/targetIon 2 4 2 0.0 4.00260325415
+
+#/ActarSim/gun/Kine/scatteredIon 1 2 1 0.0 2.0141
+#/ActarSim/gun/Kine/scatteredIon 2 4 2 0.0 4.001506179125
+#/ActarSim/gun/Kine/scatteredIon 2 4 2 0.0 4.00260325 
+/ActarSim/gun/Kine/scatteredIon 6 12 6 0.0 12.
+#/ActarSim/gun/Kine/scatteredIon 6 13 6 0.0 13.00335483778 
+#/ActarSim/gun/Kine/scatteredIon 50 133 50 0.854 132.9238
+
+#/ActarSim/gun/Kine/recoilIon 1 1 1 0.0 1.00782503207
+#/ActarSim/gun/Kine/recoilIon 1 2 1 0.0 2.0141 
+/ActarSim/gun/Kine/recoilIon 2 4 2 0.0 4.00260325415
+
+#/ActarSim/gun/energy 11. MeV
+#/ActarSim/gun/position 0 0 -56 mm
+#/ActarSim/gun/direction 0 0 1
+#/ActarSim/gun/time 0
+#/ActarSim/gun/polarization 0
+#/ActarSim/gun/number 1
+/ActarSim/gun/randomVertexZPosition on
+/ActarSim/gun/randomVertexZRange 10 128 mm
+#/ActarSim/gun/vertexZPosition 69 mm
+
+/ActarSim/gun/Kine/labEnergy 80 MeV
+/ActarSim/gun/Kine/randomThetaCM on
+/ActarSim/gun/Kine/randomThetaRange 0.0 180.0
+/ActarSim/gun/Kine/randomPhiAngle on
+#/ActarSim/gun/Kine/userThetaCM 20. deg
+#/ActarSim/gun/Kine/userThetaCM 100.0 deg
+#/ActarSim/gun/Kine/userPhiAngle 330. deg
+#/ActarSim/gun/Kine/vertexPosition 0. 0. 15 cm
 #
 # VISUALIZATION
 #
@@ -196,51 +236,67 @@
 #/vis/ASCIITree/verbose 10
 #/vis/drawTree
 # visualization
-/vis/scene/create
-/vis/open OGLSQt
-/vis/viewer/set/autoRefresh 0
-/vis/viewer/flush
+#/vis/scene/create
+#/vis/open OGLSQt
+#/vis/viewer/set/autoRefresh 0
+#/vis/viewer/flush
 # set camera
-/vis/viewer/reset
-/vis/viewer/set/hiddenEdge 0
+#/vis/viewer/reset
+#/vis/viewer/set/hiddenEdge 0
 #/vis/viewer/set/lightsThetaPhi 120 40
-/vis/viewer/set/viewpointThetaPhi 115. 145.
+#/vis/viewer/set/viewpointThetaPhi 115. 145.
 #/vis/viewer/set/viewpointThetaPhi 90. 90.
-/vis/viewer/zoom 1.0
+#/vis/viewer/zoom 1.0
 #/vis/viewer/set/background 1 1 1 1
-/vis/viewer/flush
+#/vis/viewer/flush
 #
 # drawing style
 #/vis/viewer/set/style surface
-/vis/viewer/set/style wireframe
-/vis/viewer/flush
+#/vis/viewer/set/style wireframe
+#/vis/viewer/flush
 #
 # drawing the tracks
 #/tracking/storeTrajectory 10
-/vis/scene/endOfEventAction accumulate 100
+#/vis/scene/endOfEventAction accumulate 100
 #/vis/scene/endOfEventAction refresh
 #/vis/viewer/set/autoRefresh 1
 #
 # create an empty scene and add the detector geometry to it
 #/vis/drawVolume
 #/vis/scene/add/axes 0 0 0 0.1 m
-/vis/scene/add/trajectories 
-/vis/scene/add/hits
+#/vis/scene/add/trajectories 
+#/vis/scene/add/hits
 #/ActarSim/event/drawTracks all
-/ActarSim/event/printModulo 10
+#/ActarSim/event/printModulo 10
 #
-/ActarSim/event/printModulo 5000
+/ActarSim/event/printModulo 1000
 #
 # RUN: number of events
-#
-/ActarSim/gun/Kine/labEnergy 36 MeV
-/run/beamOn 5000
+/run/beamOn 2000
 #
 #
-/ActarSim/gun/Kine/labEnergy 24 MeV
-/run/beamOn 5000
+/ActarSim/gun/Kine/incidentIon 6 12 6 0.0 12.
+/ActarSim/gun/Kine/targetIon 2 4 2 0.0 4.00260325415
+/ActarSim/gun/Kine/recoilIon 2 3 2 0.0 3.01602931914
+/ActarSim/gun/Kine/scatteredIon 6 13 6 0.0 13.00335483778 
 #
 #
-/ActarSim/gun/Kine/labEnergy 21 MeV
-/run/beamOn 5000
+/run/beamOn 20000
 #
+#
+/ActarSim/gun/Kine/incidentIon 6 12 6 0.0 12.
+/ActarSim/gun/Kine/targetIon 6 12 6 0.0 12.
+/ActarSim/gun/Kine/recoilIon 6 12 6 0.0 12.
+/ActarSim/gun/Kine/scatteredIon 6 12 6 0.0 12.
+#
+#
+/run/beamOn 20000
+#
+#
+/ActarSim/gun/Kine/incidentIon 6 12 6 0.0 12.
+/ActarSim/gun/Kine/targetIon 1 1 1 0.0 1.00782503207
+/ActarSim/gun/Kine/recoilIon 1 1 1 0.0 1.00782503207
+/ActarSim/gun/Kine/scatteredIon 6 12 6 0.0 12.
+#
+#
+/run/beamOn 20000

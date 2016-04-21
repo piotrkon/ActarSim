@@ -1,13 +1,14 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol hapolyo@usc.es
+//*-- AUTHOR : Hector Alvarez-Pol
 //*-- Date: 11/2004
-//*-- Last Update: 29/11/05
+//*-- Last Update: 26/11/15
 // --------------------------------------------------------------
 // Description:
 //   Messenger for the detector construction
 //
 // --------------------------------------------------------------
 // Comments:
+//   Messenger commands are described in their guidance (src/.cc)
 //   - 03/12/04 Created based on example/novice/N03 structure
 //
 // --------------------------------------------------------------
@@ -33,34 +34,43 @@ class ActarSimDetectorMessenger: public G4UImessenger
 {
 private:
   ActarSimDetectorConstruction* ActarSimDetector;
-  
+
   G4UIdirectory*             ActarSimDir;
   G4UIdirectory*             detDir;
   //G4UIcmdWith3VectorAndUnit* worldSizeCmd;
 
   G4UIcmdWithAString* MaikoGeoIncludedFlagCmd;
-  G4UIcmdWithADoubleAndUnit* xGasChamberCmd;
-  G4UIcmdWithADoubleAndUnit* yGasChamberCmd;
-  G4UIcmdWithADoubleAndUnit* zGasChamberCmd;
+  G4UIcmdWithAString* ACTARTPCDEMOGeoIncludedFlagCmd;
+  G4UIcmdWithAString* ACTARTPCGeoIncludedFlagCmd;
+  G4UIcmdWithAString* SpecMATGeoIncludedFlagCmd;
+  G4UIcmdWithAString* OthersGeoIncludedFlagCmd;
+  G4UIcmdWithADoubleAndUnit* chamberSizeXCmd;
+  G4UIcmdWithADoubleAndUnit* chamberSizeYCmd;
+  G4UIcmdWithADoubleAndUnit* chamberSizeZCmd;
+  G4UIcmdWithADoubleAndUnit* chamberCenterXCmd;
+  G4UIcmdWithADoubleAndUnit* chamberCenterYCmd;
+  G4UIcmdWithADoubleAndUnit* chamberCenterZCmd;
+  G4UIcmdWithADoubleAndUnit* worldSizeXCmd;
+  G4UIcmdWithADoubleAndUnit* worldSizeYCmd;
+  G4UIcmdWithADoubleAndUnit* worldSizeZCmd;
   G4UIcmdWithAString* gasGeoIncludedFlagCmd;
-  G4UIcmdWithADoubleAndUnit* yPadSizeCmd;
   G4UIcmdWithAString* silGeoIncludedFlagCmd;
   G4UIcmdWithAString* sciGeoIncludedFlagCmd;
- 
-  G4UIcmdWithAString*        mediumMaterCmd;   
+
+  G4UIcmdWithAString*        mediumMaterialCmd;
+  G4UIcmdWithAString*        chamberMaterialCmd;
 
   G4UIcmdWith3Vector*        eleFieldCmd; //problems defining elec field units
   G4UIcmdWith3VectorAndUnit* magFieldCmd;
   G4UIcmdWithoutParameter*   updateCmd;
   G4UIcmdWithoutParameter*   printCmd;
-  
+
 public:
   ActarSimDetectorMessenger(ActarSimDetectorConstruction* );
   ~ActarSimDetectorMessenger();
-  
+
   void SetNewValue(G4UIcommand*, G4String);
   //G4String GetCurrentValue(G4UIcommand*);
 };
 
 #endif
-

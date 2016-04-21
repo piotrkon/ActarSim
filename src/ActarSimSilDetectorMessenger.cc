@@ -1,7 +1,7 @@
  ///////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez Pol    hapolyo@usc.es
+//*-- AUTHOR : Hector Alvarez Pol
 //*-- Date: 04/2008
-//*-- Last Update: 
+//*-- Last Update: 07/01/15
 // --------------------------------------------------------------
 // Description:
 //   Messenger of the Silicon detector
@@ -31,7 +31,7 @@
 
 ActarSimSilDetectorMessenger::
 ActarSimSilDetectorMessenger(ActarSimSilDetectorConstruction* ActarSimSilDet)
-  :ActarSimSilDetector(ActarSimSilDet) { 
+  :ActarSimSilDetector(ActarSimSilDet) {
   //
   // Constructor with fully functionality
   //
@@ -102,7 +102,7 @@ void ActarSimSilDetectorMessenger::SetNewValue(G4UIcommand* command,
   //
 
   if( command == printCmd )
-    ActarSimSilDetector->PrintDetectorParameters(); 
+    ActarSimSilDetector->PrintDetectorParameters();
 
   if( command == sideCoverageCmd)
     ActarSimSilDetector->SetSideCoverage(sideCoverageCmd->GetNewIntValue(newValue));
@@ -116,4 +116,3 @@ void ActarSimSilDetectorMessenger::SetNewValue(G4UIcommand* command,
   if( command == zBoxHalfLengthCmd)
     ActarSimSilDetector->SetZBoxSilHalfLength(zBoxHalfLengthCmd->GetNewDoubleValue(newValue));
 }
-

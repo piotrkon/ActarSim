@@ -1,8 +1,7 @@
 /////////////////////////////////////////////////////////////////
-//*-- AUTHOR : Hector Alvarez-Pol  hapol@fpddux.usc.es
+//*-- AUTHOR : Hector Alvarez-Pol
 //*-- Date: 11/2004
-//*-- Last Update: 03/04/06
-//*-- modified by: B. Fernandez-Dominguez bfd@ns.ph.liv.ac.uk
+//*-- Last Update: 16/12/14 by Hector Alvarez Pol
 // --------------------------------------------------------------
 // Description:
 //   Messenger for the primary event generator.
@@ -43,7 +42,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   //cosmic commands
   CRYDir = new G4UIdirectory("/CRY/");
   CRYDir->SetGuidance("CRY initialization");
-   
+      
   FileCmd = new G4UIcmdWithAString("/CRY/file",this);
   FileCmd->SetGuidance("This reads the CRY definition from a file");
   FileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
@@ -59,7 +58,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   UpdateCmd->AvailableForStates(G4State_Idle);
 
   MessInput = new std::string;
-
+  //End of cosmic command
 
   gunDir = new G4UIdirectory("/ActarSim/gun/");
   gunDir->SetGuidance("PrimaryGenerator control");
@@ -108,6 +107,35 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   emittanceCmd->SetDefaultValue(1.);
   emittanceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  beamDirectionCmd = new G4UIcmdWith3Vector("/ActarSim/gun/beamDirection",this);
+  beamDirectionCmd->SetGuidance("Set beam momentum direction.");
+  beamDirectionCmd->SetGuidance("Direction needs not to be a unit vector.");
+  beamDirectionCmd->SetParameterName("Px","Py","Pz",true,true);
+  beamDirectionCmd->SetRange("Px != 0 || Py != 0 || Pz != 0");
+
+  beamThetaCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/beamTheta",this);
+  beamThetaCmd->SetGuidance("Sets theta angle for beam (in degrees)");
+  beamThetaCmd->SetParameterName("beamTheta",false);
+  //beamThetaCmd->SetRange("userThetaCM>=0.");
+  beamThetaCmd->SetUnitCategory("Angle");
+  beamThetaCmd->SetDefaultValue(0.);
+  beamThetaCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  beamPhiCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/beamPhi",this);
+  beamPhiCmd->SetGuidance("Sets theta angle for beam (in degrees)");
+  beamPhiCmd->SetParameterName("beamPhi",false);
+  //beamPhiCmd->SetRange("userPhiCM>=0.");
+  beamPhiCmd->SetUnitCategory("Angle");
+  beamPhiCmd->SetDefaultValue(0.);
+  beamPhiCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  beamPositionCmd = new G4UIcmdWith3VectorAndUnit("/ActarSim/gun/beamPosition",this);
+  beamPositionCmd->SetGuidance("Set beam starting position.");
+  beamPositionCmd->SetParameterName("X","Y","Z",true,true);
+  beamPositionCmd->SetDefaultUnit("mm");
+  //beamPositionCmd->SetUnitCategory("Length");
+  //beamPositionCmd->SetUnitCandidates("microm mm cm m km");
+
   beamRadiusAtEntranceCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/beamRadiusAtEntrance",this);
   beamRadiusAtEntranceCmd->SetGuidance("Selects the beam radius at entrance of ACTAR.");
   beamRadiusAtEntranceCmd->SetGuidance("Used with the emittance to calculate the position and angle");
@@ -118,8 +146,9 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   beamRadiusAtEntranceCmd->SetDefaultValue(1.);
   beamRadiusAtEntranceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  //HAPOL NOTE: REMOVE OR REBUILT COMPLETELY
   reactionFromEvGenCmd = new G4UIcmdWithAString("/ActarSim/gun/reactionFromEvGen",this);
-  reactionFromEvGenCmd->SetGuidance("Simulates beam/target from event generator.");
+  reactionFromEvGenCmd->SetGuidance("DO NOT USE. Simulates beam/target from event generator. DO NOT USE.");
   reactionFromEvGenCmd->SetGuidance("  Choice : on, off(default)");
   reactionFromEvGenCmd->SetParameterName("choice",true);
   reactionFromEvGenCmd->SetDefaultValue("off");
@@ -136,8 +165,9 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   reactionFromFileCmd->SetCandidates("on off");
   reactionFromFileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  //HAPOL NOTE: REMOVE OR REBUILT COMPLETELY
   reactionFromCrossSectionCmd = new G4UIcmdWithAString("/ActarSim/gun/reactionFromCrossSection",this);
-  reactionFromCrossSectionCmd->SetGuidance("Simulates beam/target from the cross-sections.");
+  reactionFromCrossSectionCmd->SetGuidance("DO NOT USE. Simulates beam/target from the cross-sections. DO NOT USE.");
   reactionFromCrossSectionCmd->SetGuidance("  Choice : on, off(default)");
   reactionFromCrossSectionCmd->SetParameterName("choice",true);
   reactionFromCrossSectionCmd->SetDefaultValue("off");
@@ -187,7 +217,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   randomPhiCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   alphaSourceCmd = new G4UIcmdWithAString("/ActarSim/gun/alphaSource",this);
-  alphaSourceCmd->SetGuidance("Select a random Phi angle for the scattered particle.");
+  alphaSourceCmd->SetGuidance("CHECK THIS COMMAND!");
   alphaSourceCmd->SetGuidance("  Choice : on(default), off");
   alphaSourceCmd->SetParameterName("choice",true);
   alphaSourceCmd->SetDefaultValue("off");
@@ -196,7 +226,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
 
 
   randomThetaValCmd = new G4UIcommand("/ActarSim/gun/randomThetaVal", this);
-  randomThetaValCmd->SetGuidance("Sets the limist in the Theta angle for the scattered particle.");
+  randomThetaValCmd->SetGuidance("Sets the limits in the Theta angle for the scattered particle.");
   randomThetaValCmd->SetGuidance("The value is randomly chosen between the limits.");
   parameter = new G4UIparameter("thetaMin", 'd', omitable = true);
   parameter->SetDefaultValue(0.);
@@ -209,7 +239,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   randomThetaValCmd->SetParameter(parameter);
 
   randomPhiValCmd = new G4UIcommand("/ActarSim/gun/randomPhiVal", this);
-  randomPhiValCmd->SetGuidance("Sets the limist in the Theta angle for the scattered particle.");
+  randomPhiValCmd->SetGuidance("Sets the limits in the Phi angle for the scattered particle.");
   randomPhiValCmd->SetGuidance("The value is randomly chosen between the limits.");
   parameter = new G4UIparameter("phiMin", 'd', omitable = true);
   parameter->SetDefaultValue(0.);
@@ -364,7 +394,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   KineDir->SetGuidance("Kine generator control");
 
   KineRandomThetaCmd = new G4UIcmdWithAString("/ActarSim/gun/Kine/randomThetaCM",this);
-  KineRandomThetaCmd->SetGuidance("Randamize Theta_CM of out-going particles or not (for KINE calculater)");
+  KineRandomThetaCmd->SetGuidance("Randomize Theta_CM of outgoing particles");
   KineRandomThetaCmd->SetGuidance("  Choice : on(default), off");
   KineRandomThetaCmd->SetParameterName("choice",true);
   KineRandomThetaCmd->SetDefaultValue("on");
@@ -372,7 +402,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   KineRandomThetaCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   KineRandomPhiAngleCmd = new G4UIcmdWithAString("/ActarSim/gun/Kine/randomPhiAngle",this);
-  KineRandomPhiAngleCmd->SetGuidance("Randamize Lab Phi angles of out-going particles or not");
+  KineRandomPhiAngleCmd->SetGuidance("Randomize Lab Phi angles of out-going particles");
   KineRandomPhiAngleCmd->SetGuidance("  Choice : on (default), off");
   KineRandomPhiAngleCmd->SetParameterName("choice",true);
   KineRandomPhiAngleCmd->SetDefaultValue("on");
@@ -380,7 +410,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   KineRandomPhiAngleCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   KineRandomThetaRangeCmd = new G4UIcommand("/ActarSim/gun/Kine/randomThetaRange", this);
-  KineRandomThetaRangeCmd->SetGuidance("Sets the limist in the Theta angle for the scattered particle.");
+  KineRandomThetaRangeCmd->SetGuidance("Sets the limits in the Theta angle for the scattered particle.");
   KineRandomThetaRangeCmd->SetGuidance("The value is randomly chosen between the limits.");
   parameter = new G4UIparameter("thetaMin", 'd', omitable = true);
   parameter->SetDefaultValue(0.);
@@ -497,7 +527,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   KineRecoilIonCmd->SetParameter(KineRecoilParam);
 
   KineLabEnergyCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/Kine/labEnergy",this);
-  KineLabEnergyCmd->SetGuidance("Sets the laboratory energy ");
+  KineLabEnergyCmd->SetGuidance("Sets the laboratory energy.");
   KineLabEnergyCmd->SetParameterName("labEnergy",false);
   KineLabEnergyCmd->SetRange("labEnergy>=0.");
   KineLabEnergyCmd->SetUnitCategory("Energy");
@@ -509,12 +539,12 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   KineUserThetaCMCmd->SetParameterName("userThetaCM",false);
   KineUserThetaCMCmd->SetRange("userThetaCM>=0.");
   KineUserThetaCMCmd->SetUnitCategory("Angle");
-  KineUserThetaCMCmd->SetDefaultValue(0.5);
+  KineUserThetaCMCmd->SetDefaultValue(0.);
   KineUserThetaCMCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 // user set the phi angle of particles, useful when testing the kinematics reconstruction methods
   KineUserPhiAngleCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/Kine/userPhiAngle",this);
-  KineUserPhiAngleCmd->SetGuidance("user set phi angle for out-going particle in the Lab system (in degrees)");
+  KineUserPhiAngleCmd->SetGuidance("User set phi angle for outgoing particle in the Lab system (in degrees)");
   KineUserPhiAngleCmd->SetParameterName("userPhiAngle",false);
   KineUserPhiAngleCmd->SetRange("userPhiAngle>=0.");
   KineUserPhiAngleCmd->SetUnitCategory("Angle");
@@ -527,7 +557,6 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   vertexPositionCmd->SetDefaultUnit("cm");
 
 // --------------------------------------------------------------end of commands for Kine dypang 080227
-
 
 // --------------------------------------------------------------commands for CRY
 
@@ -542,19 +571,18 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
 
 // --------------------------------------------------------------end of commands for CRY
 
-
   //commands affecting individual particles
   energyCmd  = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/energy",this);
   energyCmd->SetGuidance("Sets the kinetic energy of the primary particle");
   energyCmd->SetParameterName("energy",false);
   energyCmd->SetRange("energy>=0.");
   energyCmd->SetUnitCategory("Energy");
-  energyCmd->SetDefaultValue(20.);
+  energyCmd->SetDefaultValue(1.);
   energyCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   directionCmd = new G4UIcmdWith3Vector("/ActarSim/gun/direction",this);
   directionCmd->SetGuidance("Set momentum direction.");
-  directionCmd->SetGuidance("Direction needs not to be a unit vector.");
+  directionCmd->SetGuidance("Direction does not need to be a unit vector.");
   directionCmd->SetParameterName("Px","Py","Pz",true,true);
   directionCmd->SetRange("Px != 0 || Py != 0 || Pz != 0");
 
@@ -565,18 +593,6 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   //positionCmd->SetUnitCategory("Length");
   //positionCmd->SetUnitCandidates("microm mm cm m km");
 
-  EntranceYPositionCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/EntranceYPosition",this);
-  EntranceYPositionCmd->SetGuidance("Set starting Y position of the particle (0 is the midle of GasBox).");
-  EntranceYPositionCmd->SetParameterName("entranceY",true,true);
-  EntranceYPositionCmd->SetDefaultValue(0.);
-  EntranceYPositionCmd->SetDefaultUnit("cm");
-
-  EntranceZPositionCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/EntranceZPosition",this);
-  EntranceZPositionCmd->SetGuidance("Set starting Z position of the particle.");
-  EntranceZPositionCmd->SetParameterName("entranceZ",true,true);
-  EntranceZPositionCmd->SetDefaultValue(0.);
-  EntranceZPositionCmd->SetDefaultUnit("cm");
-
   timeCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/time",this);
   timeCmd->SetGuidance("Set initial time of the particle.");
   timeCmd->SetParameterName("t0",true,true);
@@ -585,7 +601,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   //timeCmd->SetUnitCandidates("ns ms s");
 
   randomVertexZPositionCmd = new G4UIcmdWithAString("/ActarSim/gun/randomVertexZPosition",this);
-  randomVertexZPositionCmd->SetGuidance("Randamize the reaction vertex Z position");
+  randomVertexZPositionCmd->SetGuidance("Randomize the reaction vertex Z position");
   randomVertexZPositionCmd->SetGuidance("Choice : on(default), off");
   randomVertexZPositionCmd->SetParameterName("choice",true);
   randomVertexZPositionCmd->SetDefaultValue("on");
@@ -606,7 +622,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   randomVertexZPositionRangeCmd->SetParameter(parameter);
 
   vertexZPositionCmd = new G4UIcmdWithADoubleAndUnit("/ActarSim/gun/vertexZPosition",this);
-  vertexZPositionCmd->SetGuidance("Set the Z-value of the reation vertex.");
+  vertexZPositionCmd->SetGuidance("Set the Z-value of the reaction vertex.");
   vertexZPositionCmd->SetParameterName("Z0",true,true);
   vertexZPositionCmd->SetDefaultUnit("mm");
   vertexZPositionCmd->SetUnitCategory("Length");
@@ -619,7 +635,7 @@ ActarSimPrimaryGeneratorMessenger::ActarSimPrimaryGeneratorMessenger(ActarSimPri
   polCmd->SetRange("Px>=-1.&&Px<=1.&&Py>=-1.&&Py<=1.&&Pz>=-1.&&Pz<=1.");
 
   numberCmd = new G4UIcmdWithAnInteger("/ActarSim/gun/number",this);
-  numberCmd->SetGuidance("Set number of particles to be generated.");
+  numberCmd->SetGuidance("Set number of particles to be generated in a single event.");
   numberCmd->SetParameterName("N",true,true);
   numberCmd->SetRange("N>0");
 
@@ -655,15 +671,16 @@ ActarSimPrimaryGeneratorMessenger::~ActarSimPrimaryGeneratorMessenger() {
   delete InputCmd;
   delete UpdateCmd;
   delete FileCmd;
+  delete reactionFromCRYCmd;
 
   delete gunDir;
   delete listCmd;
   delete particleCmd;
   delete energyCmd;
   delete directionCmd;
+  delete beamThetaCmd;
+  delete beamPhiCmd;
   delete positionCmd;
-  delete EntranceYPositionCmd;
-  delete EntranceZPositionCmd;
   delete timeCmd;
   delete randomVertexZPositionCmd;
   delete randomVertexZPositionRangeCmd;
@@ -674,6 +691,8 @@ ActarSimPrimaryGeneratorMessenger::~ActarSimPrimaryGeneratorMessenger() {
   delete realisticBeamCmd;
   delete beamInteractionCmd;
   delete emittanceCmd;
+  delete beamDirectionCmd;
+  delete beamPositionCmd;
   delete beamRadiusAtEntranceCmd;
   delete reactionFromEvGenCmd;
   delete reactionFromCrossSectionCmd;
@@ -711,8 +730,6 @@ ActarSimPrimaryGeneratorMessenger::~ActarSimPrimaryGeneratorMessenger() {
   delete KineUserPhiAngleCmd;           // in degrees
   delete vertexPositionCmd;
 // end of Kine part, dypang 080228
-
-  delete reactionFromCRYCmd;
 }
 
 void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
@@ -720,7 +737,6 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
   //
   // Setting the values from the interface
   //
-
   if( command == InputCmd )
    { 
      actarSimActionGun->InputCRY();
@@ -747,7 +763,7 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
       fShootIon = false;
       G4ParticleDefinition* pd = particleTable->FindParticle(newValues);
       if(pd != 0)
-	{ actarSimActionGun->SetParticleDefinition(pd);}
+	{ actarSimActionGun->SetParticleDefinition( pd ); }
     }
   }
 
@@ -759,6 +775,20 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
 
   if( command == emittanceCmd)
     actarSimActionGun->SetEmittance(emittanceCmd->GetNewDoubleValue(newValues));
+
+  if( command==beamDirectionCmd )
+    actarSimActionGun->SetBeamMomentumDirection(beamDirectionCmd->GetNew3VectorValue(newValues));
+
+  if( command == beamThetaCmd )
+    actarSimActionGun->
+      SetUserThetaAngle(beamThetaCmd->GetNewDoubleValue(newValues));
+
+  if( command == beamPhiCmd )
+    actarSimActionGun->
+      SetUserPhiAngle(beamPhiCmd->GetNewDoubleValue(newValues));
+
+  if( command==beamPositionCmd )
+    actarSimActionGun->SetBeamPosition(beamPositionCmd->GetNew3VectorValue(newValues));
 
   if(command == beamRadiusAtEntranceCmd)
     actarSimActionGun->SetBeamRadiusAtEntrance(beamRadiusAtEntranceCmd->GetNewDoubleValue(newValues));
@@ -780,7 +810,7 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
 
   if( command == randomThetaCmd )
     actarSimActionGun->SetRandomThetaFlag(newValues);
- 
+
  if( command == randomPhiCmd )
     actarSimActionGun->SetRandomPhiFlag(newValues);
 
@@ -823,7 +853,7 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
 
     actarSimActionGun->SetRandomPhiVal(phiMin,phiMax);
   }
- 
+
  if( command == CinerandomThetaValCmd ){
     G4double thetaMax, thetaMin;
     //    ConvertToDoublePair(newValues, thetaMin, thetaMax);
@@ -894,7 +924,7 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
     G4double incidentEnergyTmp;
     incidentEnergyTmp=KineLabEnergyCmd->GetNewDoubleValue(newValues);
     actarSimActionGun->SetLabEnergy(incidentEnergyTmp);
-    actarSimActionGun->SetIncidentEnergy(incidentEnergyTmp);
+    actarSimActionGun->SetIncidentEnergy(incidentEnergyTmp);//Piotr: why do we have incident energy and lab energy?
   }
 
   if( command == KineUserThetaCMCmd )
@@ -928,8 +958,10 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
     actarSimActionGun->
       SetThetaLabAngle(thetaLabAngleCmd->GetNewDoubleValue(newValues));
 
-  if( command == energyCmd )
-    actarSimActionGun->SetParticleEnergy(energyCmd->GetNewDoubleValue(newValues));
+  if( command == energyCmd ){
+    actarSimActionGun->SetParticleEnergy(energyCmd->GetNewDoubleValue(newValues));//Piotr: Doesn't set the energy when modify
+    actarSimActionGun->SetIncidentEnergy(energyCmd->GetNewDoubleValue(newValues));
+  }
 
   if( command==directionCmd )
     actarSimActionGun->SetParticleMomentumDirection(directionCmd->GetNew3VectorValue(newValues));
@@ -939,12 +971,6 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
 
   if( command==timeCmd )
     actarSimActionGun->SetParticleTime(timeCmd->GetNewDoubleValue(newValues));
-
-  if( command==EntranceYPositionCmd)
-    actarSimActionGun->SetEntranceYPosition(EntranceYPositionCmd->GetNewDoubleValue(newValues));
-
-  if( command==EntranceZPositionCmd)
-    actarSimActionGun->SetEntranceZPosition(EntranceZPositionCmd->GetNewDoubleValue(newValues));
 
 // vertexZPosition dypang 080704
   if( command==vertexZPositionCmd )
@@ -972,9 +998,7 @@ void ActarSimPrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command,
     actarSimActionGun->SetNumberOfParticles(numberCmd->GetNewIntValue(newValues));
 
   if( command==ionCmd )
-    {
-      IonCommand(newValues);
-    }
+    IonCommand(newValues);
 }
 
 
@@ -1013,7 +1037,7 @@ void ActarSimPrimaryGeneratorMessenger::IonCommand(G4String newValues) {
   //
   // Particular behavior of the ion command. Ion state should be selected.
   //
-  if (fShootIon) {
+  //if (fShootIon) {
     G4Tokenizer next( newValues );
     // check argument
     fAtomicNumber = StoI(next());
@@ -1044,7 +1068,7 @@ void ActarSimPrimaryGeneratorMessenger::IonCommand(G4String newValues) {
     } else {
       actarSimActionGun->SetParticleDefinition(ion);
       actarSimActionGun->SetParticleCharge(fIonCharge*eplus);
-    }
+    }/*
   } else {
     G4cout << "##################################################################"
 	   << G4endl
@@ -1052,7 +1076,7 @@ void ActarSimPrimaryGeneratorMessenger::IonCommand(G4String newValues) {
 	   << "Set /gun/particle to ion before using /gun/ion command" << G4endl;
     G4cout << "##################################################################"
 	   << G4endl;
-  }
+	   }*/
 }
 
 void ActarSimPrimaryGeneratorMessenger::incidentIonCommand(G4String newValues){

@@ -36,12 +36,16 @@ find_library(CRY_LIB CRY $ENV{CRY_LIB_PATH})
 #add_executable(A01app A01app.cc ${sources} ${headers})
 #target_link_libraries(A01app ${Geant4_LIBRARIES} ${CRY_LIB})
 
-
+# Create the directory for the Cosmic data
+#
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/cosmic")
+#file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/cosmic/data")
+file(COPY "cosmic/data" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/cosmic")
 
 #----------------------------------------------------------------------------
 # Cmake Path for installation
 #
-#CMAKE_INSTALL_PREFIX 
+#CMAKE_INSTALL_PREFIX
 #----------------------------------------------------------------------------
 # Load some basic macros which are needed later on
 include(FindROOT.cmake)
@@ -50,7 +54,9 @@ include(FindROOT.cmake)
 # Create the directory for the ROOT files
 #
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/root_files")
-
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/root_files/sim_files")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/root_files/dig_files")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/root_files/out_files")
 
 #----------------------------------------------------------------------------
 # Setup Geant4 include directories and compile definitions
@@ -95,11 +101,11 @@ if (CMAKE_SYSTEM_NAME MATCHES Darwin)
       set(CMAKE_C_FLAGS_DEBUGFULL        "-g3 -fno-inline -Wno-long-long -std=iso9899:1990 -Wundef -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
       set(CMAKE_C_FLAGS_PROFILE          "-g3 -fno-inline -ftest-coverage -fprofile-arcs")
 
-      
-      
+
+
       endif (CMAKE_COMPILER_IS_GNUCXX)
 
-endif (CMAKE_SYSTEM_NAME MATCHES Darwin) 
+endif (CMAKE_SYSTEM_NAME MATCHES Darwin)
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
@@ -112,8 +118,8 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #----------------------------------------------------------------------------
 # Set everything needed for the root dictonary and create the
 # dictionary
-set(ActarSim_HEADERS ${PROJECT_SOURCE_DIR}/include/ActarSimData.hh 
-		     ${PROJECT_SOURCE_DIR}/include/ActarSimTrack.hh 
+set(ActarSim_HEADERS ${PROJECT_SOURCE_DIR}/include/ActarSimData.hh
+		     ${PROJECT_SOURCE_DIR}/include/ActarSimTrack.hh
 		     ${PROJECT_SOURCE_DIR}/include/ActarSimSimpleTrack.hh
 		     ${PROJECT_SOURCE_DIR}/include/ActarSimSilHit.hh
 		     ${PROJECT_SOURCE_DIR}/include/ActarSimSilRingHit.hh
@@ -124,7 +130,7 @@ set(ActarSim_HEADERS ${PROJECT_SOURCE_DIR}/include/ActarSimData.hh
 		     ${PROJECT_SOURCE_DIR}/include/ActarSimBeamInfo.hh
 		     )
 set(ActarSim_LINKDEF ${PROJECT_SOURCE_DIR}/src/ActarSimLinkDef.hh )
-set(ActarSim_DICTIONARY ActarSimDict.cc) 
+set(ActarSim_DICTIONARY ActarSimDict.cc)
 ROOT_GENERATE_DICTIONARY("${ActarSim_HEADERS}" "${ActarSim_LINKDEF}" "${ActarSim_DICTIONARY}" "${ROOT_INCLUDE_DIR}")
 
 
@@ -163,16 +169,19 @@ add_dependencies(actarsim actar)
 set(ACTARSIM_SCRIPTS
 gui.mac
 vis_cosmic.mac
-vis_actar.mac 
-vis_maiko.mac 
-vis_kine.mac 
+vis_actar.mac
+vis_maiko.mac
+vis_kine.mac
+vis_alpha.mac
+vis_simpleBox.mac
+vis_simpleTube.mac
 kine_batch.mac
 12C_batch.mac
 digitizationMacro.C
 digit.h
-dig_reaction.C
-Analysis_range.C
-p_on_D2_400mbar.root
+MTrack.h
+Reducer.C
+Analysis_reduce.C
  )
 
 foreach(_script ${ACTARSIM_SCRIPTS})
@@ -182,6 +191,24 @@ foreach(_script ${ACTARSIM_SCRIPTS})
     COPYONLY
     )
 endforeach()
+
+
+#----------------------------------------------------------------------------
+# Add DOXYGEN DOCUMENTATION
+# The documentation is created in the binary (build) directory subdir /html
+# To read the documentation open the index.html file using a browser
+#
+#
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/build_tools/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+add_custom_target(doc ALL
+${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+COMMENT "Generating API documentation with Doxygen" VERBATIM
+)
+endif(DOXYGEN_FOUND)
+
 
 
 #----------------------------------------------------------------------------
