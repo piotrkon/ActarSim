@@ -1,4 +1,7 @@
 //INSTALLING ACTARSIM
+0. Install the CRY database and set CRY environmental variables following the instruction in
+cosmic/geant/README
+
 1. Create a new directory (ActarSim_build) where the program will be compiled and installed and change to it
 
 $mkdir ../ActarSim-build
